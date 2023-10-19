@@ -1,4 +1,5 @@
 import { buildServer } from "./build_server";
+import "dotenv/config";
 
 const PORT = parseInt(process.env.PORT || "3001");
 
