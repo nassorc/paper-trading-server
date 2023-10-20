@@ -11,12 +11,6 @@ async function main() {
       app.log.error(err);
       process.exit(1);
     }
-
-    ["SIGINT", "SIGTERM"].forEach((signal) => {
-      process.on(signal, async () => {
-        await app.close();
-      });
-    });
   });
 }
 

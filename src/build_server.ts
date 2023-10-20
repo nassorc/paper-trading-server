@@ -5,6 +5,7 @@ import { IStockDataSource } from "types";
 import StockHandler from "./stock";
 import fp from "fastify-plugin";
 import StockDataSourceAPI from "./stock/data_source";
+import fastifyGracefulShutdown = require("fastify-graceful-shutdown");
 
 declare module "fastify" {
   export interface FastifyInstance {
@@ -27,9 +28,18 @@ export async function buildServer(): Promise<FastifyInstance> {
     logger: true,
   });
   fastify
+    .register(fastifyGracefulShutdown)
     .register(redisPlugin)
     .register(fp(decorateFastifyIntance))
-    .register(StockHandler);
+    .register(StockHandler)
+    .after(() => {
+      fastify.gracefulShutdown(async (signal, next) => {
+        if (["SIGINT", "SIGTERM"].includes(signal)) {
+          await fastify.close();
+        }
+        next();
+      });
+    });
 
   return fastify;
 }
