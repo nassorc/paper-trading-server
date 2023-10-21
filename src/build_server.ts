@@ -1,11 +1,16 @@
-import Fastify, { FastifyInstance, FastifyPluginOptions } from "fastify";
-import StockService from "./stock/service";
+import Fastify, {
+  FastifyInstance,
+  FastifyPluginOptions,
+  FastifyRequest,
+  FastifyReply,
+} from "fastify";
 import { redisPlugin } from "./config/connectToRedis";
 import { IStockDataSource } from "types";
 import StockHandler from "./stock";
 import fp from "fastify-plugin";
 import StockDataSourceAPI from "./stock/data_source";
 import fastifyGracefulShutdown = require("fastify-graceful-shutdown");
+import fastifyJwt = require("@fastify/jwt");
 
 declare module "fastify" {
   export interface FastifyInstance {
@@ -20,16 +25,32 @@ function decorateFastifyIntance(
 ) {
   const stockService = new StockService(new StockDataSourceAPI());
   fastify.decorate("stockService", stockService);
+  fastify.decorate(
+    "requireUser",
+    async function (request: FastifyRequest, reply: FastifyReply) {
+      try {
+        // custom global onRequest hook provided by fastify-jwt wiil
+        // attatch the decode payload to request.user
+        await request.jwtVerify();
+      } catch (err) {
+        reply.send(err);
+      }
+    }
+  );
   done();
 }
 
 export async function buildServer(): Promise<FastifyInstance> {
   const fastify = Fastify({
-    logger: true,
+    logger: {
+      level: "debug",
+      enabled: true,
+    },
   });
   fastify
     .register(fastifyGracefulShutdown)
     .register(redisPlugin)
+    .register(fp(fastifyJwt), { secret: "secretKey" })
     .register(fp(decorateFastifyIntance))
     .register(StockHandler)
     .after(() => {
