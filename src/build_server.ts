@@ -1,6 +1,6 @@
 import Fastify, { FastifyInstance, FastifyPluginOptions } from "fastify";
-import { redisPlugin } from "./lib/redis";
 import StockService from "./stock/service";
+import { redisPlugin } from "./config/connectToRedis";
 import { IStockDataSource } from "types";
 import StockHandler from "./stock";
 import fp from "fastify-plugin";
