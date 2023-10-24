@@ -9,6 +9,7 @@ import {
   FastifyRequest,
 } from "fastify";
 import { $ref, StockQuoteType, StockOrderType } from "./stock.schema";
+import { NextFn } from "types";
 
 export default function (
   fastify: FastifyInstance,
@@ -26,7 +27,7 @@ export default function (
     stockHandler
   );
   // protected route
-  fastify.register(function (fastify, options, next: () => void) {
+  fastify.register(function (fastify, options, next: NextFn) {
     fastify.addHook("preHandler", fastify.requireUser);
     fastify.post(
       "/stock",
@@ -67,7 +68,16 @@ async function purchaseStockHandler(
 ) {
   // create order
   const order = request.body;
-  this.log.debug(`Purchase ${order.symbol} @${100}`);
+  const userId = (request.user as any).id;
+  const orderReceived = this.stockService.purchaseStock(
+    userId,
+    order.symbol,
+    order.quantity
+  );
+  // get current stock quote
+  // get user's wallet
+  // validate
+  // make transaction
   // const stockInformation = this.stockService.getStockQuote(order.symbol);
   // const wallet = this.userService.getWallet(request.userId);
   // this.stockService.purchasStock(order, wallet);
