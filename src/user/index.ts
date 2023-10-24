@@ -1,4 +1,4 @@
-import {
+import fastify, {
   FastifyInstance,
   FastifyPluginOptions,
   FastifyReply,
@@ -28,6 +28,7 @@ export default function (
     loginHander
   );
   fastify.post("/register", registerHandler);
+
   // protected routes
   fastify.register(function (
     fastify: FastifyInstance,
@@ -41,28 +42,57 @@ export default function (
   next();
 }
 
-function loginHander(
+async function loginHander(
   this: FastifyInstance,
   request: FastifyRequest<{ Body: LoginInput }>,
   reply: FastifyReply
 ) {
-  const body = request.body;
-  const token = this.jwt.sign(body);
-  return reply.code(200).send({ accessToken: token });
+  const user = await this.userService.loginUser(request.body);
+  return reply.code(200).send({ accessToken: this.jwt.sign(user) });
 }
 
-function registerHandler(
+async function registerHandler(
   this: FastifyInstance,
   request: FastifyRequest<{ Body: { username: string; password: string } }>,
   reply: FastifyReply
 ) {
-  return reply.code(201).send({ message: "created" });
+  const user = await this.userService.registerUser(request.body);
+  return reply.code(201).send({ message: "created", userId: user.id });
+  /*
+  const { username, password } = request.body;
+  const UNIQUE_CONSTRAINT_FAILED = "P2002";
+
+  try {
+    const res = await this.db.user.create({
+      data: {
+        username,
+        password,
+        wallet: {
+          create: {},
+        },
+      },
+    });
+    return reply.code(201).send({ message: "created", userId: res.id });
+  } catch (err: any) {
+    if (err.code === UNIQUE_CONSTRAINT_FAILED) {
+      return reply.code(409).send({ message: "username already exists" });
+    }
+    return reply
+      .code(500)
+      .send({ message: "something went wrong. please try again later" });
+  }
+  // return reply.code(409).send({ message: "username already exists" });
+  */
 }
 
-function userHandler(
+async function userHandler(
   this: FastifyInstance,
-  request: FastifyRequest<{ Body: { username: string; password: string } }>,
+  request: FastifyRequest<{ Params: { userId: string } }>,
   reply: FastifyReply
 ) {
-  reply.code(200).send({ username: "mat" });
+  const user = await this.userService.getUserById(
+    parseInt(request.params.userId)
+  );
+  // if (!user) return reply.code(404).send({ message: "user not found" });
+  return reply.code(200).send(user);
 }

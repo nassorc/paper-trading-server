@@ -1,19 +1,28 @@
 import { z } from "zod";
 import { buildJsonSchemas } from "fastify-zod";
 
-const loginSchema = z.object({
+const loginInputSchema = z.object({
   username: z.string(),
   password: z.string(),
+});
+const loginOutputSchema = z.object({
+  accessToekn: z.string(),
+});
+const UserSafeOutputSchema = z.object({
+  id: z.number(),
+  username: z.string(),
 });
 
 const loginResponseSchema = z.object({
   accessToken: z.string(),
 });
 
-export type LoginInput = z.infer<typeof loginSchema>;
+export type LoginInput = z.infer<typeof loginInputSchema>;
 
-export { loginSchema };
+export { loginInputSchema as loginSchema };
 export const { schemas: userSchemas, $ref } = buildJsonSchemas({
-  loginSchema,
+  loginSchema: loginInputSchema,
+  loginOutputSchema,
+  UserSafeOutputSchema,
   loginResponseSchema,
 });
