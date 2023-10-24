@@ -1,27 +1,57 @@
+import { Prisma } from "@prisma/client";
+import { Optional } from "types";
+
 export class InsufficientFunds extends Error {
   constructor(message: string = "Insufficient funds") {
     super(message);
   }
 }
 
-class Wallet {
-  constructor(private funds: number) {}
-  isEmpty(): boolean {
-    return this.funds == 0;
+type WalletType = {
+  id: number;
+  funds: number;
+  ownerId: number;
+};
+
+type WalletOptionalId = Optional<WalletType, "id">;
+
+class WalletService {
+  constructor(private walletCollection: Prisma.WalletDelegate) {}
+
+  async addAmount(userId: number, amount: number) {
+    const userWallet = await this.getWalletByUserId(userId);
+    const result = userWallet.funds + amount;
+    await this.walletCollection.update({
+      where: {
+        ownerId: userId,
+      },
+      data: {
+        funds: result,
+      },
+    });
   }
-  hasSufficientFunds(amount: number): boolean {
-    return amount >= this.funds;
+
+  async subtractAmount(userId: number, amount: number) {
+    const userWallet = await this.getWalletByUserId(userId);
+    const result = userWallet.funds - amount;
+    await this.walletCollection.update({
+      where: {
+        ownerId: userId,
+      },
+      data: {
+        funds: result,
+      },
+    });
   }
-  subtractAmount(amount: number) {
-    if (!this.hasSufficientFunds(amount)) {
-      throw new InsufficientFunds();
-    } else {
-      this.funds -= amount;
-    }
-  }
-  addAmount(amount: number) {
-    this.funds += amount;
+
+  async getWalletByUserId(userId: number): Promise<WalletType> {
+    const wallet = this.walletCollection.findFirst({
+      where: {
+        ownerId: userId,
+      },
+    });
+    return wallet as any as WalletType;
   }
 }
 
-export default Wallet;
+export default WalletService;
