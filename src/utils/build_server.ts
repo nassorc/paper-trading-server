@@ -16,8 +16,10 @@ import WalletController from "../wallet";
 export async function buildServer(): Promise<FastifyInstance> {
   const fastify = Fastify({
     logger: {
+      transport: {
+        target: "pino-pretty",
+      },
       level: "debug",
-      enabled: true,
     },
   });
   fastify
