@@ -1,11 +1,6 @@
 import { Prisma } from "@prisma/client";
+import { NotFound, RECORD_NOT_FOUND_CODE } from "../utils/errors";
 import { Optional } from "types";
-
-export class InsufficientFunds extends Error {
-  constructor(message: string = "Insufficient funds") {
-    super(message);
-  }
-}
 
 type WalletType = {
   id: number;
@@ -19,37 +14,52 @@ class WalletService {
   constructor(private walletCollection: Prisma.WalletDelegate) {}
 
   async addAmount(userId: number, amount: number) {
-    const userWallet = await this.getWalletByUserId(userId);
-    const result = userWallet.funds + amount;
-    await this.walletCollection.update({
-      where: {
-        ownerId: userId,
-      },
-      data: {
-        funds: result,
-      },
-    });
+    try {
+      const userWallet = await this.getWalletByUserId(userId);
+      const result = userWallet.funds + amount;
+      await this.walletCollection.update({
+        where: {
+          ownerId: userId,
+        },
+        data: {
+          funds: result,
+        },
+      });
+    } catch (err: any | { code: string }) {
+      if (err.code == RECORD_NOT_FOUND_CODE) {
+        throw new NotFound("WalletNotFound");
+      }
+      throw err;
+    }
   }
 
   async subtractAmount(userId: number, amount: number) {
-    const userWallet = await this.getWalletByUserId(userId);
-    const result = userWallet.funds - amount;
-    await this.walletCollection.update({
-      where: {
-        ownerId: userId,
-      },
-      data: {
-        funds: result,
-      },
-    });
+    try {
+      const userWallet = await this.getWalletByUserId(userId);
+      const result = userWallet.funds - amount;
+      await this.walletCollection.update({
+        where: {
+          ownerId: userId,
+        },
+        data: {
+          funds: result,
+        },
+      });
+    } catch (err: any) {
+      if (err.code == RECORD_NOT_FOUND_CODE) {
+        throw new NotFound("WalletNotFound");
+      }
+      throw err;
+    }
   }
 
   async getWalletByUserId(userId: number): Promise<WalletType> {
-    const wallet = this.walletCollection.findFirst({
+    const wallet = await this.walletCollection.findFirst({
       where: {
         ownerId: userId,
       },
     });
+    if (!wallet) throw new NotFound();
     return wallet as any as WalletType;
   }
 }
