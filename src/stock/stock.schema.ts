@@ -16,14 +16,21 @@ const purchaseStockInput = z.object({
   quantity: z.number(),
 });
 
+const sellStockInput = z.object({
+  symbol: z.string(),
+  quantity: z.number(),
+});
+
 export type StockQuoteType = z.infer<typeof stockQuote>;
 export type StockOrderType = z.infer<typeof purchaseStockInput>;
+export type StockSellType = z.infer<typeof sellStockInput>;
 
 export const { schemas: stockSchemas, $ref } = buildJsonSchemas(
   {
     getStockQuoteInput,
     stockQuote,
     purchaseStockInput,
+    sellStockInput,
   },
   { $id: "StockSchema" }
 );

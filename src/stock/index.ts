@@ -13,6 +13,7 @@ import {
   $ref,
   StockQuoteType,
   StockOrderType,
+  StockSellType,
 } from "./stock.schema";
 import { NextFn } from "types";
 
@@ -39,8 +40,25 @@ export default function (
       { schema: { body: $ref("purchaseStockInput") } },
       purchaseStockHandler
     );
+    fastify.post(
+      "/stock/sell",
+      { schema: { body: $ref("sellStockInput") } },
+      sellStockHandler
+    );
     next();
   });
+
+  // CONTROLLER ERROR HANDLER
+  fastify.setErrorHandler(function (
+    this: FastifyInstance,
+    error: FastifyError,
+    request: FastifyRequest,
+    reply: FastifyReply
+  ) {
+    // let default error handler handle user errors
+    throw error;
+  });
+
   next();
 }
 
@@ -75,6 +93,30 @@ async function purchaseStockHandler(
   const order = request.body;
   const userId = (request.user as any).id;
   const orderReceived = this.stockService.purchaseStock(
+    userId,
+    order.symbol,
+    order.quantity
+  );
+  // get current stock quote
+  // get user's wallet
+  // validate
+  // make transaction
+  // const stockInformation = this.stockService.getStockQuote(order.symbol);
+  // const wallet = this.userService.getWallet(request.userId);
+  // this.stockService.purchasStock(order, wallet);
+  // publish message to observer
+  return reply.code(201).send(request.body);
+}
+
+async function sellStockHandler(
+  this: FastifyInstance,
+  request: FastifyRequest<{ Body: StockSellType }>,
+  reply: FastifyReply
+) {
+  // create order
+  const order = request.body;
+  const userId = (request.user as any).id;
+  const orderReceived = this.stockService.sellStockPosition(
     userId,
     order.symbol,
     order.quantity
