@@ -1,6 +1,7 @@
 import { IStockDataSource } from "types";
-import WalletService, { InsufficientFunds } from "../wallet/wallet.service";
-import { PrismaClient, Prisma } from "@prisma/client";
+import WalletService from "../wallet/wallet.service";
+import { Prisma } from "@prisma/client";
+import { AppError, InsufficientFunds } from "../utils/errors";
 
 class StockService {
   constructor(
@@ -18,17 +19,11 @@ class StockService {
     const stockQuote = await this.getStockQuote(symbol);
     // get user's wallet
     const userWallet: any = await this.walletClient.getWalletByUserId(userId);
-    if (!stockQuote) throw new Error("Cannot fetch stock quote");
-    if (!userWallet)
-      throw new Error(
-        "Wallet not found. Either User does not exist or User does not have a wallet"
-      );
-    const total = stockQuote.price * quantity;
-    if (userWallet.funds < total)
-      throw new Error("Insufficient funds. Cannot purchase stock");
+    const totalPrice = stockQuote.price * quantity;
+    if (userWallet.funds < totalPrice) throw new InsufficientFunds();
 
     // subtract amount from wallet
-    await this.walletClient.subtractAmount(userId, total);
+    await this.walletClient.subtractAmount(userId, totalPrice);
     // update user's portfolio to reflect purchased stock
 
     await this.portfolioCollection.update({

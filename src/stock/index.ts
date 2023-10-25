@@ -3,12 +3,17 @@
 // write handler functions
 
 import {
+  FastifyError,
   FastifyInstance,
   FastifyPluginOptions,
   FastifyReply,
   FastifyRequest,
 } from "fastify";
-import { $ref, StockQuoteType, StockOrderType } from "./stock.schema";
+import {
+  $ref,
+  StockQuoteType,
+  StockOrderType,
+} from "./stock.schema";
 import { NextFn } from "types";
 
 export default function (
@@ -30,7 +35,7 @@ export default function (
   fastify.register(function (fastify, options, next: NextFn) {
     fastify.addHook("preHandler", fastify.requireUser);
     fastify.post(
-      "/stock",
+      "/stock/buy",
       { schema: { body: $ref("purchaseStockInput") } },
       purchaseStockHandler
     );
