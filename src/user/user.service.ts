@@ -1,6 +1,10 @@
-import { Prisma, PrismaClient, User } from "@prisma/client";
+import { Prisma, User } from "@prisma/client";
+import {
+  DuplicateUsernameError,
+  InvalidCredentials,
+  UserNotFound,
+} from "../utils/errors";
 import { Optional } from "types";
-
 type Credentials = Optional<User, "id">;
 
 export interface UserType {
@@ -24,27 +28,34 @@ class UserService {
         },
       },
     });
-    if (!user) throw new Error("UserNotFound");
+    if (!user) throw new InvalidCredentials();
     return user;
   }
 
   async registerUser(user: Credentials): Promise<User> {
-    const UNIQUE_CONSTRAINT_FAILED = "P2002";
     const { username, password } = user;
 
-    const res = await this.userCollection.create({
-      data: {
-        username,
-        password,
-        wallet: {
-          create: {},
+    try {
+      const res = await this.userCollection.create({
+        data: {
+          username,
+          password,
+          wallet: {
+            create: {},
+          },
+          portfolio: {
+            create: {},
+          },
         },
-        portfolio: {
-          create: {},
-        },
-      },
-    });
-    return res;
+      });
+      return res;
+    } catch (err: any) {
+      if (err instanceof Prisma.PrismaClientKnownRequestError) {
+        throw new DuplicateUsernameError();
+      } else {
+        throw err;
+      }
+    }
   }
 
   async registerUserWithWallet(user: Credentials) {
@@ -79,8 +90,7 @@ class UserService {
         wallet: true,
       },
     });
-    console.log(user);
-    if (!user) throw new Error("UserNotFound");
+    if (!user) throw new UserNotFound();
     return user;
   }
   async getUserProfile(username: string): Promise<User> {
@@ -91,7 +101,7 @@ class UserService {
         },
       },
     });
-    if (!user) throw new Error("UserNotFound");
+    if (!user) throw new UserNotFound();
     return user;
   }
 }

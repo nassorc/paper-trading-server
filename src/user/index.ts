@@ -1,4 +1,5 @@
 import fastify, {
+  FastifyError,
   FastifyInstance,
   FastifyPluginOptions,
   FastifyReply,
@@ -39,6 +40,18 @@ export default function (
     fastify.get("/user/:userId", userHandler);
     next();
   });
+
+  // CONTROLLER ERROR HANDLER
+  fastify.setErrorHandler(function (
+    this: FastifyInstance,
+    error: FastifyError,
+    request: FastifyRequest,
+    reply: FastifyReply
+  ) {
+    // let default error handler handle user errors
+    throw error;
+  });
+
   next();
 }
 
@@ -58,31 +71,6 @@ async function registerHandler(
 ) {
   const user = await this.userService.registerUser(request.body);
   return reply.code(201).send({ message: "created", userId: user.id });
-  /*
-  const { username, password } = request.body;
-  const UNIQUE_CONSTRAINT_FAILED = "P2002";
-
-  try {
-    const res = await this.db.user.create({
-      data: {
-        username,
-        password,
-        wallet: {
-          create: {},
-        },
-      },
-    });
-    return reply.code(201).send({ message: "created", userId: res.id });
-  } catch (err: any) {
-    if (err.code === UNIQUE_CONSTRAINT_FAILED) {
-      return reply.code(409).send({ message: "username already exists" });
-    }
-    return reply
-      .code(500)
-      .send({ message: "something went wrong. please try again later" });
-  }
-  // return reply.code(409).send({ message: "username already exists" });
-  */
 }
 
 async function userHandler(
