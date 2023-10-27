@@ -1,5 +1,6 @@
 import Fastify, { FastifyInstance } from "fastify";
 import { dbConnectionPlugin } from "../config/dbConnection";
+import "dotenv/config";
 
 // PLUGINS
 import fp from "fastify-plugin";
@@ -13,19 +14,22 @@ import StockController from "../stock";
 import UserController from "../user";
 import WalletController from "../wallet";
 
-export async function buildServer(): Promise<FastifyInstance> {
-  const fastify = Fastify({
-    logger: {
-      transport: {
-        target: "pino-pretty",
-      },
-      level: "debug",
+const defaultOptions = {
+  logger: {
+    transport: {
+      target: "pino-pretty",
     },
-  });
+    level: "debug",
+  },
+};
+
+export function buildServer(serverOpts = defaultOptions): FastifyInstance {
+  const jwtSecret = process.env.JWT_SECRET || "secret";
+  const fastify = Fastify(serverOpts);
   fastify
     .register(fastifyGracefulShutdown)
     .register(dbConnectionPlugin)
-    .register(fp(fastifyJwt), { secret: "secretKey" })
+    .register(fp(fastifyJwt), { secret: jwtSecret })
     .register(fp(decorateFastifyIntance))
     .register(fp(requireUser))
     .register(StockController)
