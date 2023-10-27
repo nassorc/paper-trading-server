@@ -104,6 +104,14 @@ class UserService {
     if (!user) throw new UserNotFound();
     return user;
   }
+  async deleteUser(userId: number) {
+    const res = await this.userCollection.delete({
+      where: {
+        id: userId,
+      },
+    });
+    console.log(res);
+  }
 }
 
 export default UserService;
