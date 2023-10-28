@@ -68,19 +68,8 @@ async function stockHandler(
   reply: FastifyReply
 ) {
   const symbol = request.params.symbol;
-  const cacheKey = `quote:${symbol}`;
-  // check if symbol in cache
-  const existsInCache = await this.redis.exists(cacheKey);
-  // CACHE HIT
-  if (existsInCache) {
-    this.log.debug("GET /stock CACHE HIT");
-    const stockQuote = await this.redis.hgetall(cacheKey);
-    return reply.code(200).send(stockQuote);
-  }
-  // CACHE MISS
-  this.log.debug("GET /stock CACHE MISS");
-  const data = await this.stockService.getStockQuote(symbol);
-  await this.redis.hset(cacheKey, data);
+  const data = await this.stockService.getCachedOrFetchStockQuote(symbol);
+
   return reply.code(200).send(data);
 }
 

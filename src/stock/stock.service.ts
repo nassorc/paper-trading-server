@@ -2,16 +2,31 @@ import { IStockDataSource } from "types";
 import WalletService from "../wallet/wallet.service";
 import { Prisma } from "@prisma/client";
 import { AppError, InsufficientFunds } from "../utils/errors";
+import { RedisCommander } from "ioredis";
 
 class StockService {
   constructor(
     private stockAPIClient: IStockDataSource,
     private walletClient: WalletService,
-    private portfolioCollection: Prisma.PortfolioDelegate
+    private portfolioCollection: Prisma.PortfolioDelegate,
+    private cache: RedisCommander
   ) {}
 
   async getStockQuote(symbol: string) {
     return await this.stockAPIClient.getStockQuote(symbol);
+  }
+  async getCachedOrFetchStockQuote(symbol: string) {
+    const cacheKey = `quote:${symbol}`;
+    const existsInCache = await this.cache.exists(cacheKey);
+    // CACHE HIT
+    if (existsInCache) {
+      const stockQuote = await this.cache.hgetall(cacheKey);
+      return stockQuote;
+    }
+    // CACHE MISS
+    const data = await this.getStockQuote(symbol);
+    await this.cache.hset(cacheKey, data);
+    return data;
   }
 
   async purchaseStock(userId: number, symbol: string, quantity: number) {
