@@ -17,6 +17,7 @@ model User {
   transactions Transaction[]
   portfolio Portfolio?
   wallet Wallet?
+  watchlist Watchlist?
 }
 
 model Wallet {
@@ -49,4 +50,11 @@ model PurchasedStock {
   investorId Int
 
   @@unique([symbol, investorId], name: "stock_portfolio_id")
+}
+
+model Watchlist {
+  id Int @id @default(autoincrement())
+  symbols String[]
+  investor User @relation(fields: [investorId], references: [id], onDelete: Cascade)
+  investorId Int @unique
 }
