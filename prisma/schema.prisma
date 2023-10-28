@@ -22,7 +22,7 @@ model User {
 model Wallet {
   id Int @id @default(autoincrement())
   funds Int @default(0)
-  owner User @relation(fields: [ownerId], references: [id])
+  owner User @relation(fields: [ownerId], references: [id], onDelete: Cascade)
   ownerId Int @unique
 }
 
@@ -35,7 +35,7 @@ model Transaction {
 model Portfolio {
   id Int @id @default(autoincrement())
   gains Float @default(0)
-  investor User @relation(fields: [investorId], references: [id])
+  investor User @relation(fields: [investorId], references: [id], onDelete: Cascade)
   investorId Int @unique
   stocks PurchasedStock[]
 }
@@ -44,7 +44,7 @@ model PurchasedStock {
   id Int @id @default(autoincrement())
   symbol String  
   quantity Int
-  portfolio Portfolio @relation(fields: [portfolioId], references: [id])
+  portfolio Portfolio @relation(fields: [portfolioId], references: [id], onDelete: Cascade)
   portfolioId Int 
   investorId Int
 
