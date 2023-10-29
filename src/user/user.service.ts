@@ -46,6 +46,9 @@ class UserService {
           portfolio: {
             create: {},
           },
+          watchlist: {
+            create: {},
+          },
         },
       });
       return res;
@@ -58,22 +61,6 @@ class UserService {
     }
   }
 
-  async registerUserWithWallet(user: Credentials) {
-    // TODO?: use Wallet Serivce to create the wallet
-    const newUserWithWallet = await this.userCollection.create({
-      data: {
-        ...user,
-        wallet: {
-          create: {
-            funds: 0,
-          },
-        },
-        portfolio: {
-          create: {},
-        },
-      },
-    });
-  }
   async getUserById(userId: number): Promise<User> {
     const user = await this.userCollection.findFirst({
       where: {

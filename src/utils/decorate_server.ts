@@ -8,6 +8,7 @@ import UserService from "../user/user.service";
 import StockService from "../stock/stock.service";
 import WalletService from "../wallet/wallet.service";
 import StockDataSourceAPI from "../stock/data_source";
+import WatchlistService from "../watchlist/watchlist.service";
 import { FastifyInstance } from "fastify";
 
 declare module "fastify" {
@@ -15,6 +16,7 @@ declare module "fastify" {
     userService: UserService;
     stockService: StockService;
     walletService: WalletService;
+    watchlistService: WatchlistService;
     requireUser: (
       request: FastifyRequest,
       reply: FastifyReply
@@ -22,28 +24,33 @@ declare module "fastify" {
   }
 }
 
-export async function decorateFastifyIntance(fastify: FastifyInstance) {
+export async function decorateFastifyIntance(app: FastifyInstance) {
   // This function will decorate the global instance of fastify
   // SCHEMAS
   for (const schema of [...userSchemas, ...stockSchemas, ...walletSchemas]) {
-    fastify.addSchema(schema);
+    app.addSchema(schema);
   }
   // SERVICES
-  const userCollection = await fastify.db.user;
+  const userCollection = await app.db.user;
   const userService = new UserService(userCollection);
-  fastify.decorate("userService", userService);
+  app.decorate("userService", userService);
 
-  const walletCollection = await fastify.db.wallet;
+  const walletCollection = await app.db.wallet;
   const walletService = new WalletService(walletCollection);
-  fastify.decorate("walletService", walletService);
+  app.decorate("walletService", walletService);
 
-  const stockCollection = await fastify.db.purchasedStock;
-  const portfolioCollection = await fastify.db.portfolio;
+  const stockCollection = await app.db.purchasedStock;
+  const portfolioCollection = await app.db.portfolio;
   const stockAPI = new StockDataSourceAPI();
   const stockService = new StockService(
     stockAPI,
     walletService,
-    portfolioCollection
+    portfolioCollection,
+    app.redis
   );
-  fastify.decorate("stockService", stockService);
+  app.decorate("stockService", stockService);
+
+  const watchlistCollection = await app.db.watchlist;
+  const watchlistService = new WatchlistService(watchlistCollection);
+  app.decorate("watchlistService", watchlistService);
 }

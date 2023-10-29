@@ -13,6 +13,7 @@ import { requireUser } from "./require_user";
 import StockController from "../stock";
 import UserController from "../user";
 import WalletController from "../wallet";
+import WatchlistController from "../watchlist";
 
 const defaultOptions = {
   logger: {
@@ -35,6 +36,7 @@ export function buildServer(serverOpts = defaultOptions): FastifyInstance {
     .register(StockController)
     .register(UserController)
     .register(WalletController)
+    .register(WatchlistController)
     .after(() => {
       fastify.gracefulShutdown(async (signal, next) => {
         if (["SIGINT", "SIGTERM"].includes(signal)) {

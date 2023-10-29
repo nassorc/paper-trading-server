@@ -18,11 +18,11 @@ import {
 import { NextFn } from "types";
 
 export default function (
-  fastify: FastifyInstance,
+  app: FastifyInstance,
   options: FastifyPluginOptions,
   next: () => void
 ) {
-  fastify.get(
+  app.get(
     "/stock/:symbol",
     {
       schema: {
@@ -33,14 +33,14 @@ export default function (
     stockHandler
   );
   // protected route
-  fastify.register(function (fastify, options, next: NextFn) {
-    fastify.addHook("preHandler", fastify.requireUser);
-    fastify.post(
+  app.register(function (app, options, next: NextFn) {
+    app.addHook("preHandler", app.requireUser);
+    app.post(
       "/stock/buy",
       { schema: { body: $ref("purchaseStockInput") } },
       purchaseStockHandler
     );
-    fastify.post(
+    app.post(
       "/stock/sell",
       { schema: { body: $ref("sellStockInput") } },
       sellStockHandler
@@ -49,7 +49,7 @@ export default function (
   });
 
   // CONTROLLER ERROR HANDLER
-  fastify.setErrorHandler(function (
+  app.setErrorHandler(function (
     this: FastifyInstance,
     error: FastifyError,
     request: FastifyRequest,
@@ -86,14 +86,6 @@ async function purchaseStockHandler(
     order.symbol,
     order.quantity
   );
-  // get current stock quote
-  // get user's wallet
-  // validate
-  // make transaction
-  // const stockInformation = this.stockService.getStockQuote(order.symbol);
-  // const wallet = this.userService.getWallet(request.userId);
-  // this.stockService.purchasStock(order, wallet);
-  // publish message to observer
   return reply.code(201).send(request.body);
 }
 
@@ -110,13 +102,5 @@ async function sellStockHandler(
     order.symbol,
     order.quantity
   );
-  // get current stock quote
-  // get user's wallet
-  // validate
-  // make transaction
-  // const stockInformation = this.stockService.getStockQuote(order.symbol);
-  // const wallet = this.userService.getWallet(request.userId);
-  // this.stockService.purchasStock(order, wallet);
-  // publish message to observer
   return reply.code(201).send(request.body);
 }
