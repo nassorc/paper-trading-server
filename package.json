@@ -3,9 +3,11 @@
   "version": "1.0.0",
   "main": "src/index.js",
   "scripts": {
+    "db:up": "brew services start redis && brew services start postgresql",
+    "db:down": "brew services stop redis && brew services stop postgresql",
     "dev": "nodemon src/index.ts",
     "build": "tsc",
-    "test": "jest"
+    "test:integration": "jest --detectOpenHandles"
   },
   "author": "Matthew Crossan",
   "license": "ISC",
@@ -14,14 +16,18 @@
   "dependencies": {
     "@fastify/jwt": "^7.2.2",
     "@prisma/client": "^5.4.2",
+    "@types/jsonwebtoken": "^9.0.4",
     "axios": "^1.5.1",
     "dotenv": "^16.3.1",
     "fastify": "^4.24.2",
     "fastify-graceful-shutdown": "^3.5.1",
     "fastify-plugin": "^4.5.1",
+    "fastify-socket.io": "^5.0.0",
     "fastify-zod": "^1.4.0",
     "ioredis": "^5.3.2",
+    "jsonwebtoken": "^9.0.2",
     "pino-pretty": "^10.2.3",
+    "socket.io": "^4.7.2",
     "zod": "^3.22.4"
   },
   "devDependencies": {
