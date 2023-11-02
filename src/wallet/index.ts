@@ -27,23 +27,24 @@ export default function (
       },
       getWalletHandler
     );
-    fastify.post(
-      "/wallet/add-funds",
-      async function (
-        this: FastifyInstance,
-        request: FastifyRequest,
-        reply: FastifyReply
-      ) {
-        const amount = (request.body as any).amount;
-        const userId = (request.user as any).id;
-        await this.walletService.addAmount(userId, amount);
-
-        return reply.code(201).send({ message: "amount added" });
-      }
-    );
+    fastify.post("/wallet/add-funds", addFundsHander);
     next();
   });
   next();
+}
+
+async function addFundsHander(
+  this: FastifyInstance,
+  request: FastifyRequest<{ Body: { amount: number } }>,
+  reply: FastifyReply
+) {
+  const amount = request.body.amount;
+  // @ts-ignore
+  const userId = request.user.id;
+  await this.walletService.addAmount(userId, amount);
+  await this.walletService.updateTotalAmount(userId, amount);
+
+  return reply.code(201).send({ message: "amount added" });
 }
 
 async function getWalletHandler(
