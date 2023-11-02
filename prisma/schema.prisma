@@ -23,6 +23,7 @@ model User {
 model Wallet {
   id Int @id @default(autoincrement())
   funds Int @default(0)
+  totalAmount Int @default(0)
   owner User @relation(fields: [ownerId], references: [id], onDelete: Cascade)
   ownerId Int @unique
 }
@@ -31,6 +32,8 @@ model Transaction {
   id Int @id @default(autoincrement())
   author User @relation(fields: [authorId], references: [id]) 
   authorId Int 
+  createdAt DateTime @default(now())
+  updatedAt DateTime?
 }
 
 model Portfolio {
