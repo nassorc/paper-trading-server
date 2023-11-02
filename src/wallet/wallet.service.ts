@@ -1,10 +1,15 @@
 import { Prisma } from "@prisma/client";
-import { NotFound, RECORD_NOT_FOUND_CODE } from "../utils/errors";
+import {
+  InsufficientFunds,
+  NotFound,
+  RECORD_NOT_FOUND_CODE,
+} from "../utils/errors";
 import { Optional } from "types";
 
 type WalletType = {
   id: number;
   funds: number;
+  totalAmount: number;
   ownerId: number;
 };
 
@@ -16,13 +21,14 @@ class WalletService {
   async addAmount(userId: number, amount: number) {
     try {
       const userWallet = await this.getWalletByUserId(userId);
-      const result = userWallet.funds + amount;
+      const updatedFunds = userWallet.funds + amount;
+
       await this.walletCollection.update({
         where: {
           ownerId: userId,
         },
         data: {
-          funds: result,
+          funds: updatedFunds,
         },
       });
     } catch (err: any | { code: string }) {
@@ -36,13 +42,16 @@ class WalletService {
   async subtractAmount(userId: number, amount: number) {
     try {
       const userWallet = await this.getWalletByUserId(userId);
-      const result = userWallet.funds - amount;
+      const updatedFunds = userWallet.funds - amount;
+      if (updatedFunds < 0) {
+        throw new InsufficientFunds();
+      }
       await this.walletCollection.update({
         where: {
           ownerId: userId,
         },
         data: {
-          funds: result,
+          funds: updatedFunds,
         },
       });
     } catch (err: any) {
@@ -61,6 +70,26 @@ class WalletService {
     });
     if (!wallet) throw new NotFound();
     return wallet as any as WalletType;
+  }
+
+  async updateTotalAmount(userId: number, amount: number) {
+    try {
+      const userWallet = await this.getWalletByUserId(userId);
+      const newTotal = userWallet.totalAmount + amount;
+      await this.walletCollection.update({
+        where: {
+          ownerId: userId,
+        },
+        data: {
+          totalAmount: newTotal,
+        },
+      });
+    } catch (err: any) {
+      if (err.code == RECORD_NOT_FOUND_CODE) {
+        throw new NotFound("WalletNotFound");
+      }
+      throw err;
+    }
   }
 }
 

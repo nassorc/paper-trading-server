@@ -3,11 +3,11 @@
   "version": "1.0.0",
   "main": "src/index.js",
   "scripts": {
-    "db:up": "brew services start redis && brew services start postgresql",
-    "db:down": "brew services stop redis && brew services stop postgresql",
+    "predev": "prisma generate && prisma db push && npm run seed",
     "dev": "nodemon src/index.ts",
     "build": "tsc",
-    "test:integration": "jest --detectOpenHandles"
+    "test:integration": "jest --detectOpenHandles",
+    "seed": "ts-node prisma/seed.ts"
   },
   "author": "Matthew Crossan",
   "license": "ISC",
