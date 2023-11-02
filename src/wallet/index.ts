@@ -28,6 +28,7 @@ export default function (
       getWalletHandler
     );
     fastify.post("/wallet/add-funds", addFundsHander);
+    fastify.post("/wallet/subtract-funds", subtractFundsHander);
     next();
   });
   next();
@@ -43,6 +44,20 @@ async function addFundsHander(
   const userId = request.user.id;
   await this.walletService.addAmount(userId, amount);
   await this.walletService.updateTotalAmount(userId, amount);
+
+  return reply.code(201).send({ message: "amount added" });
+}
+
+async function subtractFundsHander(
+  this: FastifyInstance,
+  request: FastifyRequest<{ Body: { amount: number } }>,
+  reply: FastifyReply
+) {
+  const amount = request.body.amount;
+  // @ts-ignore
+  const userId = request.user.id;
+  await this.walletService.subtractAmount(userId, amount);
+  await this.walletService.updateTotalAmount(userId, amount * -1);
 
   return reply.code(201).send({ message: "amount added" });
 }
