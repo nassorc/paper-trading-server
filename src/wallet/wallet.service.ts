@@ -91,6 +91,10 @@ class WalletService {
       throw err;
     }
   }
+
+  async check(userId: number, amount: number) {
+    return true;
+  }
 }
 
 export default WalletService;
