@@ -7,6 +7,9 @@ export default class WatchlistService {
       where: {
         investorId: userId,
       },
+      include: {
+        symbols: true,
+      },
     });
   }
   async addSymbolToWatchlist(userId: number, symbol: string) {
@@ -16,7 +19,14 @@ export default class WatchlistService {
       },
       data: {
         symbols: {
-          push: symbol,
+          connectOrCreate: {
+            where: {
+              symbol: symbol,
+            },
+            create: {
+              symbol: symbol,
+            },
+          },
         },
       },
     });
