@@ -1,5 +1,6 @@
 import { Prisma } from "@prisma/client";
 import {
+  AppError,
   InsufficientFunds,
   NotFound,
   RECORD_NOT_FOUND_CODE,
@@ -93,7 +94,15 @@ class WalletService {
   }
 
   async check(userId: number, amount: number) {
-    return true;
+    const wallet = await this.walletCollection.findFirst({
+      where: {
+        ownerId: userId,
+      },
+    });
+    if (!wallet) {
+      throw new AppError("Could not find user wallet", 400);
+    }
+    return amount <= wallet?.funds;
   }
 }
 
