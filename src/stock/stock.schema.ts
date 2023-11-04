@@ -12,7 +12,7 @@ const getStockQuoteInput = z.object({
 
 const purchaseStockInput = z.object({
   symbol: z.string(),
-  price: z.number(),
+  // price: z.number(),
   quantity: z.number(),
 });
 
