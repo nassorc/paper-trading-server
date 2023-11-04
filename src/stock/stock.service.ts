@@ -46,6 +46,18 @@ class StockService {
     this.cache = cache;
   }
 
+  async getDBStockRef(symbol: string): Promise<{ id: number; symbol: string }> {
+    return await this.stockCollection.upsert({
+      where: {
+        symbol: symbol,
+      },
+      create: {
+        symbol: symbol,
+      },
+      update: {},
+    });
+  }
+
   async getStockQuote(symbol: string) {
     return await this.stockAPIClient.getStockQuote(symbol);
   }
