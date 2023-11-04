@@ -71,7 +71,11 @@ class UserService {
       include: {
         portfolio: {
           include: {
-            stocks: true,
+            stocks: {
+              include: {
+                symbol: true,
+              },
+            },
           },
         },
         wallet: true,
