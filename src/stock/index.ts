@@ -1,7 +1,3 @@
-// include schema
-// collect routes and attach correct handler
-// write handler functions
-
 import {
   FastifyError,
   FastifyInstance,
@@ -81,11 +77,11 @@ async function purchaseStockHandler(
   // create order
   const order = request.body;
   const userId = (request.user as any).id;
-  const orderReceived = this.stockService.purchaseStock(
-    userId,
-    order.symbol,
-    order.quantity
-  );
+  await this.stockOrderService.createBuyOrder({
+    userId: userId,
+    symbol: order.symbol,
+    quantity: order.quantity,
+  });
   return reply.code(201).send(request.body);
 }
 
@@ -97,10 +93,10 @@ async function sellStockHandler(
   // create order
   const order = request.body;
   const userId = (request.user as any).id;
-  const orderReceived = this.stockService.sellStockPosition(
-    userId,
-    order.symbol,
-    order.quantity
-  );
+  await this.stockOrderService.createSellOrder({
+    userId: userId,
+    symbol: order.symbol,
+    quantity: order.quantity,
+  });
   return reply.code(201).send(request.body);
 }
