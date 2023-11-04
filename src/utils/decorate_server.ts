@@ -5,6 +5,7 @@ import { walletSchemas } from "../wallet/wallet.schema";
 
 // SERVICES
 import UserService from "../user/user.service";
+import StockDataSourceAPI from "../stock/api";
 import StockService from "../stock/stock.service";
 import WalletService from "../wallet/wallet.service";
 import StockDataSourceAPI from "../stock/data_source";
