@@ -1,7 +1,9 @@
 import WalletService from "../wallet/wallet.service";
 import StockService from "./stock.service";
 import PorfolioService from "../portfolio/portfolio.service";
-import TransactionService from "../transaction/transaction.service";
+import TransactionService, {
+  OrderType,
+} from "../transaction/transaction.service";
 import { AppError } from "../utils/errors";
 
 export interface StockOrderType {
@@ -45,6 +47,12 @@ class StockOrderService {
     // await this.stockClient.getDBStockRef(symbol);
     await this.portfolioClient.addStockInvestment(userId, symbol, quantity);
     await this.walletClient.subtractAmount(userId, total);
+    await this.transactionClient.createTransaction(OrderType.PURCHASE, {
+      userId: userId,
+      symbol: symbol,
+      amount: total,
+      quantity: quantity,
+    });
   }
   async createSellOrder(order: StockOrderType) {
     if (!this.parseOrder(order)) {
@@ -75,6 +83,12 @@ class StockOrderService {
       await this.portfolioClient.removeStockInvestment(userId, symbol);
     }
     await this.walletClient.addAmount(userId, total);
+    await this.transactionClient.createTransaction(OrderType.SELL, {
+      userId: userId,
+      symbol: symbol,
+      amount: total,
+      quantity: quantity,
+    });
   }
   private parseOrder(order: StockOrderType): order is StockOrderType {
     return "userId" in order && "symbol" in order && "quantity" in order;
