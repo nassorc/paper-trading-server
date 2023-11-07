@@ -44,17 +44,6 @@ export default function (
     next();
   });
 
-  // CONTROLLER ERROR HANDLER
-  app.setErrorHandler(function (
-    this: FastifyInstance,
-    error: FastifyError,
-    request: FastifyRequest,
-    reply: FastifyReply
-  ) {
-    // let default error handler handle user errors
-    throw error;
-  });
-
   next();
 }
 

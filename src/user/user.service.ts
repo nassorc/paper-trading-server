@@ -79,6 +79,11 @@ class UserService {
           },
         },
         wallet: true,
+        transactions: {
+          include: {
+            stock: true,
+          },
+        },
       },
     });
     if (!user) throw new UserNotFound();
