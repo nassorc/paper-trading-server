@@ -4,7 +4,7 @@ import "dotenv/config";
 const PORT = parseInt(process.env.PORT || "3001");
 
 async function main() {
-  const app = await buildServer();
+  const app = await buildServer({ logger: true });
 
   app.listen({ port: PORT }, (err) => {
     if (err) {

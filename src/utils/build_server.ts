@@ -18,16 +18,8 @@ import WatchlistController from "../watchlist";
 import fastifyIO from "fastify-socket.io";
 import { Server, Socket } from "socket.io";
 import { NextFn } from "types";
-import { attachWatchlist } from "./attachWatchlist";
-
-const defaultOptions = {
-  logger: {
-    transport: {
-      target: "pino-pretty",
-    },
-    level: "debug",
-  },
-};
+import { attachWatchlist } from "./attach_watchlist";
+import redis from "../libs/redis";
 
 declare module "fastify" {
   interface FastifyInstance {
@@ -62,9 +54,16 @@ async function io(app: FastifyInstance) {
   });
 }
 
-export function buildServer(serverOpts = defaultOptions): FastifyInstance {
+export function buildServer(opts?: any): FastifyInstance {
   const jwtSecret = process.env.JWT_SECRET || "secret";
-  const fastify = Fastify(serverOpts);
+  const fastify = Fastify({
+    logger: opts?.logger && {
+      transport: {
+        target: "pino-pretty",
+      },
+      level: opts?.level || "info",
+    },
+  });
   fastify
     .register(dbConnectionPlugin)
     .register(fastifyIO)
@@ -80,6 +79,8 @@ export function buildServer(serverOpts = defaultOptions): FastifyInstance {
     .after(() => {
       fastify.gracefulShutdown(async (signal, next) => {
         if (["SIGINT", "SIGTERM"].includes(signal)) {
+          await fastify.redis.shutdown();
+          await fastify.redis.quit();
           await fastify.close();
         }
         next();

@@ -1,7 +1,7 @@
 import { FastifyInstance, FastifyPluginOptions } from "fastify";
 import fp from "fastify-plugin";
 import { RedisCommander } from "ioredis";
-import redis from "../libs/redis";
+import Redis from "../libs/redis";
 import { PrismaClient } from "@prisma/client";
 import prisma from "../libs/prisma";
 
@@ -39,7 +39,7 @@ function dbConnectionPlugin(
 ) {
   // database connection
   fastify.decorate("db", prisma);
-  fastify.decorate("redis", redis);
+  fastify.decorate("redis", new Redis());
   done();
 }
 
