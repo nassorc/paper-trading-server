@@ -24,7 +24,7 @@ class WalletService {
       const userWallet = await this.getWalletByUserId(userId);
       const updatedFunds = userWallet.funds + amount;
 
-      await this.walletCollection.update({
+      return await this.walletCollection.update({
         where: {
           ownerId: userId,
         },

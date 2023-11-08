@@ -27,7 +27,19 @@ export default function (
       },
       getWalletHandler
     );
-    fastify.post("/wallet/add-funds", addFundsHander);
+    fastify.post(
+      "/wallet/add-funds",
+      {
+        schema: {
+          body: {
+            type: "object",
+            required: ["amount"],
+            properties: { amount: { type: "number" } },
+          },
+        },
+      },
+      addFundsHander
+    );
     fastify.post("/wallet/subtract-funds", subtractFundsHander);
     next();
   });
@@ -42,10 +54,12 @@ async function addFundsHander(
   const amount = request.body.amount;
   // @ts-ignore
   const userId = request.user.id;
-  await this.walletService.addAmount(userId, amount);
+  const updatedWallet = await this.walletService.addAmount(userId, amount);
   await this.walletService.updateTotalAmount(userId, amount);
 
-  return reply.code(201).send({ message: "amount added" });
+  return reply
+    .code(201)
+    .send({ message: "amount added", amount: updatedWallet.funds });
 }
 
 async function subtractFundsHander(
