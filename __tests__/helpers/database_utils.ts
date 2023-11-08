@@ -39,3 +39,16 @@ export async function registerUserHelper(credentials: Partial<LoginInputType>) {
     body: credentials,
   });
 }
+
+export async function addFundsHelper(token?: string, amount?: number) {
+  return await app.inject({
+    method: "POST",
+    url: `/wallet/add-funds`,
+    headers: {
+      authorization: `bearer ${token}`,
+    },
+    body: {
+      amount: amount,
+    },
+  });
+}
