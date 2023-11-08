@@ -11,6 +11,15 @@ export async function createUserHelper({ username, password }: LoginInputType) {
     data: {
       username,
       password,
+      wallet: {
+        create: {},
+      },
+      portfolio: {
+        create: {},
+      },
+      watchlist: {
+        create: {},
+      },
     },
   });
 }
