@@ -16,7 +16,6 @@ enum WalletTransactionType {
 enum StockOrderType {
   PURCHASE
   SELL
-	@@map("OrderType")
 }
 
 model User {
