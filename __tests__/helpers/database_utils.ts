@@ -52,3 +52,10 @@ export async function addFundsHelper(token?: string, amount?: number) {
     },
   });
 }
+
+export async function getStockQuoteHelper(symbol: string) {
+  return await app.inject({
+    method: "GET",
+    url: `/stock/${symbol}`,
+  });
+}
