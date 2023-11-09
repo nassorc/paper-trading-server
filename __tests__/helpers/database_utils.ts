@@ -53,9 +53,12 @@ export async function addFundsHelper(token?: string, amount?: number) {
   });
 }
 
-export async function getStockQuoteHelper(symbol: string) {
+export async function getStockQuoteHelper(symbol?: string) {
   return await app.inject({
     method: "GET",
     url: `/stock/${symbol}`,
   });
 }
+
+// TODO: create a global redis instance with the singleton pattern
+// to be used by the server and the tests
