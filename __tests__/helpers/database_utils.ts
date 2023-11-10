@@ -62,8 +62,17 @@ export async function getStockQuoteHelper(symbol?: string) {
   });
 }
 
-// TODO: create a global redis instance with the singleton pattern
-// to be used by the server and the tests
+export async function buyStock(payload: any, accessToken: string) {
+  return await app.inject({
+    method: "POST",
+    url: `/stock/buy`,
+    body: payload,
+    headers: {
+      authorization: `bearer ${accessToken}`,
+    },
+  });
+}
+
 const jwtSecretKey = process.env.JWT_SECRET;
 
 export function createFakeAuthAccessToken(payload: any) {
