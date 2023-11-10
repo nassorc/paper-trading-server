@@ -1,5 +1,7 @@
 import prisma from "../../src/libs/prisma";
 import app from "./create_server";
+import jwt from "jsonwebtoken";
+import "dotenv/config";
 
 export interface LoginInputType {
   username: string;
@@ -62,3 +64,10 @@ export async function getStockQuoteHelper(symbol?: string) {
 
 // TODO: create a global redis instance with the singleton pattern
 // to be used by the server and the tests
+const jwtSecretKey = process.env.JWT_SECRET;
+
+export function createFakeAuthAccessToken(payload: any) {
+  const token = jwt.sign(payload, jwtSecretKey as string);
+  return token;
+}
+
