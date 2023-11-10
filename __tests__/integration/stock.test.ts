@@ -3,7 +3,10 @@ import axios from "axios";
 import { Redis } from "ioredis";
 import StockDataSourceAPI from "../../src/stock/api";
 import StockService from "../../src/stock/stock.service";
-import { getStockQuoteHelper } from "../helpers/database_utils";
+import {
+  getStockQuoteHelper,
+  prefetchStockQuoteFromAPI,
+} from "../helpers/database_utils";
 import { createCacheKey } from "../../src/utils/create_cachekey";
 import codes from "../../src/utils/reponse_code";
 import app from "../helpers/create_server";
@@ -25,15 +28,7 @@ const stockCacheKey = createCacheKey(testStock);
 const redis = new Redis();
 
 beforeAll(async () => {
-  try {
-    const api = new StockDataSourceAPI();
-    prefetchStockQuote = await api.getStockQuote(testStock);
-  } catch (err: any) {
-    prefetchStockQuote = {
-      symbol: testStock,
-      price: 101.98,
-    };
-  }
+  prefetchStockQuote = await prefetchStockQuoteFromAPI(testStock);
 });
 
 describe("Stock", () => {

@@ -71,3 +71,18 @@ export function createFakeAuthAccessToken(payload: any) {
   return token;
 }
 
+import StockDataSourceAPI from "../../src/stock/api";
+export async function prefetchStockQuoteFromAPI(symbol: string) {
+  let prefetchStockQuote: any;
+  try {
+    const api = new StockDataSourceAPI();
+    prefetchStockQuote = await api.getStockQuote(symbol);
+    return prefetchStockQuote;
+  } catch (err: any) {
+    prefetchStockQuote = {
+      symbol: symbol,
+      price: 101.98,
+    };
+    return prefetchStockQuote;
+  }
+}
