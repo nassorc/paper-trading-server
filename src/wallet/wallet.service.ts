@@ -52,7 +52,8 @@ class WalletService {
           ownerId: userId,
         },
         data: {
-          funds: updatedFunds,
+          funds: { set: updatedFunds },
+          // funds: updatedFunds,
         },
       });
     } catch (err: any) {

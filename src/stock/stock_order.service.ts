@@ -53,6 +53,7 @@ class StockOrderService {
       amount: total,
       quantity: quantity,
     });
+    // throw new Error("error");
   }
   async createSellOrder(order: StockOrderType) {
     if (!this.parseOrder(order)) {

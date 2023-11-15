@@ -1,9 +1,11 @@
 import WalletService from "../wallet/wallet.service";
 import StockAPI from "./api";
 import prisma from "../libs/prisma";
-import redis from "../libs/redis";
+import Redis from "../libs/redis";
 import { DeepMockProxy, mockDeep, mockReset } from "jest-mock-extended";
 import StockService from "./stock.service";
+
+const redis = new Redis();
 
 jest.mock("../libs/prisma");
 jest.mock("../libs/redis");

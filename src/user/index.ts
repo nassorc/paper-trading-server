@@ -13,11 +13,8 @@ export default function (
   next: () => void
 ) {
   // unprotected routes
-  fastify.get("/health", (request, reply) => {
-    return reply.code(200).send("healthy");
-  });
   fastify.post(
-    "/login",
+    "/signin",
     {
       schema: {
         body: $ref("loginSchema"),
@@ -28,7 +25,7 @@ export default function (
     },
     loginHander
   );
-  fastify.post("/register", registerHandler);
+  fastify.post("/signup", registerHandler);
 
   // protected routes
   fastify.register(function (

@@ -16,10 +16,9 @@ import UserController from "../user";
 import WalletController from "../wallet";
 import WatchlistController from "../watchlist";
 import fastifyIO from "fastify-socket.io";
-import { Server, Socket } from "socket.io";
-import { NextFn } from "types";
+import { Server } from "socket.io";
 import { attachWatchlist } from "./attach_watchlist";
-import redis from "../libs/redis";
+import cors from "@fastify/cors";
 
 declare module "fastify" {
   interface FastifyInstance {
@@ -65,6 +64,9 @@ export function buildServer(opts?: any): FastifyInstance {
     },
   });
   fastify
+    .register(cors, {
+      origin: "*",
+    })
     .register(dbConnectionPlugin)
     .register(fastifyIO)
     .register(fastifyGracefulShutdown)
