@@ -20,5 +20,8 @@ module.exports = {
     headers: {
       "Access-Control-Allow-Origin": "*",
     },
+    historyApiFallback: {
+      index: "index.html",
+    },
   },
 };
