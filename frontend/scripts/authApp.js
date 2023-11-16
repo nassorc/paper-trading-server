@@ -6,7 +6,7 @@ const AUTH_EVENTS = {
   signup: "signup",
 };
 
-const init = () => {
+const initAuthApp = () => {
   // CREATE CUSTOM AUTH EVENTS
   const inputIDS = { username: "#username", password: "#password" };
   const authBtns = { signin: "#signin-btn", signup: "#signup-btn" };
@@ -31,12 +31,16 @@ const init = () => {
     const getAuthInputs = gatherInputs(...Object.values(inputIDS));
     return async (ev) => {
       // disable inputs
-      disableElms(...Object.values(authBtns));
-      const inputs = getAuthInputs();
-      const message = await fn(inputs);
-      enableElms(...Object.values(authBtns));
-      const signupEvent = new CustomEvent(event, { detail: { message } });
-      document.dispatchEvent(signupEvent);
+      try {
+        disableElms(...Object.values(authBtns));
+        const inputs = getAuthInputs();
+        const message = await fn(inputs);
+        enableElms(...Object.values(authBtns));
+        const signupEvent = new CustomEvent(event, { detail: { message } });
+        document.dispatchEvent(signupEvent);
+      } catch (err) {
+        enableElms(...Object.values(authBtns));
+      }
     };
   };
   document.addEventListener(AUTH_EVENTS.signup, (e) => {
@@ -60,4 +64,7 @@ const init = () => {
       authInputController(AUTH_EVENTS.signup, handleSignUp)
     );
 };
-init();
+
+module.exports = {
+  initAuthApp,
+};
