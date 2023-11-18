@@ -1,13 +1,14 @@
-const SIGNUP_URL = "http://localhost:3001/signup";
-const SIGNIN_URL = "http://localhost:3001/signin";
-const VALIDATE_TOKEN_URL = "http://localhost:3001/token/validate";
-const DEPOSIT_FUNDS_URL = "http://localhost:3001/wallet/add-funds";
-const WITHDRAW_FUNDS_URL = "http://localhost:3001/wallet/subtract-funds";
-const GET_WALLET_URL = "http://localhost:3001/wallet";
-const LIST_STOCKS_URL = "http://localhost:3001/stock/list";
-const GET_STOCK_URL = "http://localhost:3001/stock/";
-const PURCHASE_STOCK_URL = "http://localhost:3001/stock/buy";
-const SELL_STOCK_URL = "http://localhost:3001/stock/sell";
+const API_URL = "http://localhost:3001";
+const SIGNUP_URL = API_URL + "/signup";
+const SIGNIN_URL = API_URL + "/signin";
+const VALIDATE_TOKEN_URL = API_URL + "/token/validate";
+const DEPOSIT_FUNDS_URL = API_URL + "/wallet/add-funds";
+const WITHDRAW_FUNDS_URL = API_URL + "/wallet/subtract-funds";
+const GET_WALLET_URL = API_URL + "/wallet";
+const LIST_STOCKS_URL = API_URL + "/stock/list";
+const GET_STOCK_URL = API_URL + "/stock/";
+const PURCHASE_STOCK_URL = API_URL + "/stock/buy";
+const SELL_STOCK_URL = API_URL + "/stock/sell";
 const { navigate } = require("./router");
 const {
   validateCredentials,
