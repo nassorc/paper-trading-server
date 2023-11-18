@@ -64,17 +64,16 @@ const handleSignUp = async (credentials) => {
 };
 
 const validateToken = async (token) => {
-  // const res = await fetch(VALIDATE_TOKEN_URL, {
-  //   method: "GET",
-  //   mode: "cors",
-  //   body: JSON.stringify({ token }),
-  //   headers: {
-  //     "Content-Type": "application/json",
-  //   },
-  // });
-  // const data = await res.json();
-  // return data.valid;
-  return false;
+  const res = await fetch(VALIDATE_TOKEN_URL, {
+    method: "POST",
+    mode: "cors",
+    body: JSON.stringify({ token }),
+    headers: {
+      "Content-Type": "application/json",
+    },
+  });
+  const data = await res.json();
+  return data.valid;
 };
 
 module.exports = {

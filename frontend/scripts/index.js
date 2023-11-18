@@ -21,13 +21,11 @@ async function getHTML(htmlPath) {
 }
 async function main() {
   const requireUser = async () => {
-    console.log("PREHANDLING USR");
     const accessToken = localStorage.getItem("accessToken");
     if (!accessToken) {
       navigate("/");
     }
     const valid = await validateToken(accessToken);
-    console.log("valid?", valid);
     if (!valid) {
       navigate("/auth");
     }
