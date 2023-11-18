@@ -1,5 +1,7 @@
 const SIGNUP_URL = "http://localhost:3001/signup";
 const SIGNIN_URL = "http://localhost:3001/signin";
+const VALIDATE_TOKEN_URL = "http://localhost:3001/token/validate";
+const { navigate } = require("./router");
 const { validateCredentials, setLocalStorage } = require("./utils");
 
 const AUTH_RESPONSES = {
@@ -41,6 +43,7 @@ const handleSignIn = async (credentials) => {
     const data = await res.json();
     setLocalStorage("accessToken", data.accessToken);
   }
+  navigate("/");
   return getResponseMessage(res.status);
 };
 
@@ -60,7 +63,22 @@ const handleSignUp = async (credentials) => {
   return getResponseMessage(res.status);
 };
 
+const validateToken = async (token) => {
+  // const res = await fetch(VALIDATE_TOKEN_URL, {
+  //   method: "GET",
+  //   mode: "cors",
+  //   body: JSON.stringify({ token }),
+  //   headers: {
+  //     "Content-Type": "application/json",
+  //   },
+  // });
+  // const data = await res.json();
+  // return data.valid;
+  return false;
+};
+
 module.exports = {
   handleSignIn,
   handleSignUp,
+  validateToken,
 };

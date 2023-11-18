@@ -1,5 +1,7 @@
 const Router = require("./router");
+const { navigate } = require("./router");
 const { initAuthApp } = require("./authApp");
+const { validateToken } = require("./actions");
 const app = document.querySelector("#app");
 
 async function fetchHeader() {
@@ -18,11 +20,24 @@ async function getHTML(htmlPath) {
   return html;
 }
 async function main() {
-  console.log("SCRIPT RELOADED");
+  const requireUser = async () => {
+    console.log("PREHANDLING USR");
+    const accessToken = localStorage.getItem("accessToken");
+    if (!accessToken) {
+      navigate("/");
+    }
+    const valid = await validateToken(accessToken);
+    console.log("valid?", valid);
+    if (!valid) {
+      navigate("/auth");
+    }
+  };
   const router = new Router("#app");
+  // ROUTES
+  // PROTECTED ROUTES
   router
-    .addRoute("/", await getHTML("./pages/index.html"))
-    .addRoute("/auth", await getHTML("./pages/auth.html"), () => {
+    .addRoute("/", await getHTML("./pages/index.html"), [requireUser])
+    .addRoute("/auth", await getHTML("./pages/auth.html"), [], () => {
       initAuthApp();
     })
     .init();

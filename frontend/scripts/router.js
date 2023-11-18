@@ -4,6 +4,7 @@ class Router {
   #currentPath = "/";
   #routes = {};
   #handlers = {};
+  #prehandlers = {};
   constructor(appSelector, initialPath = document.location.pathname) {
     if (typeof appSelector !== "string")
       throw new Error("Must pass a string selector to an html element.");
@@ -26,11 +27,18 @@ class Router {
     this.#setURLPathname({}, "", this.#currentPath);
     this.#updateLocation();
   }
-  addRoute(path, template, handler = () => {}) {
+  addRoute(path, template, prehandlers = [], handler = () => {}) {
     if (typeof path !== "string") throw new Error("path must be a string");
     if (typeof path !== "string") throw new Error("template must be a string");
     this.#routes[path] = template;
     this.#handlers[path] = handler;
+    this.#prehandlers[path] = prehandlers;
+    return this;
+  }
+  route(route) {
+    this.#routes[route.path] = route.template;
+    this.#handlers[route.path] = route.handler;
+    this.#prehandlers[route.path] = route.prehandlers;
     return this;
   }
   #addListenders() {
@@ -49,13 +57,18 @@ class Router {
     });
     // when user refresh page, ensure we remain on the same page
     window.addEventListener("unload", (e) => {
-      console.log("unloading", document.location.pathname);
       const path = document.location.pathname;
       this.#setURLPathname({}, "", path);
       this.#updateLocation();
     });
+    window.addEventListener("popstate", (e) => {
+      console.log("POPPING");
+    });
   }
   #setURLPathname(data, unused, path) {
+    this.#prehandlers[path].forEach((handler) => {
+      handler();
+    });
     window.history.pushState(data, unused, path);
     this.#currentPath = path;
   }
@@ -72,4 +85,11 @@ class Router {
   }
 }
 
+function navigate(path) {
+  window.history.pushState({}, "", path);
+  location.reload();
+}
+
 module.exports = Router;
+module.exports.navigate = navigate;
+// export default Router;
