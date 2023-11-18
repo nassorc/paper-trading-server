@@ -13,8 +13,12 @@ const gatherInputs = (...args) => {
 const setLocalStorage = (key, value) => {
   window.localStorage.setItem(key, value);
 };
+const getAccessToken = () => {
+  return localStorage.getItem("accessToken");
+};
 module.exports = {
   validateCredentials,
   gatherInputs,
   setLocalStorage,
+  getAccessToken,
 };
