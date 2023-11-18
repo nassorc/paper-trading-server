@@ -4,6 +4,10 @@ const VALIDATE_TOKEN_URL = "http://localhost:3001/token/validate";
 const DEPOSIT_FUNDS_URL = "http://localhost:3001/wallet/add-funds";
 const WITHDRAW_FUNDS_URL = "http://localhost:3001/wallet/subtract-funds";
 const GET_WALLET_URL = "http://localhost:3001/wallet";
+const LIST_STOCKS_URL = "http://localhost:3001/stock/list";
+const GET_STOCK_URL = "http://localhost:3001/stock/";
+const PURCHASE_STOCK_URL = "http://localhost:3001/stock/buy";
+const SELL_STOCK_URL = "http://localhost:3001/stock/sell";
 const { navigate } = require("./router");
 const {
   validateCredentials,
@@ -126,6 +130,69 @@ const withdrawFunds = async (amount) => {
   });
   const data = await res.json();
 };
+
+const listStock = async (symbol) => {
+  const res = await fetch(LIST_STOCKS_URL + `/${symbol}`, {
+    method: "GET",
+    mode: "cors",
+    body: JSON.stringify({ symbol }),
+    headers: {
+      "Content-Type": "application/json",
+    },
+    headers: {
+      Authorization: `bearer ${getAccessToken()}`,
+    },
+  });
+  const data = await res.json();
+  return data.stocks;
+};
+
+const getStock = async (symbol) => {
+  const res = await fetch(GET_STOCK_URL + `/${symbol}`, {
+    method: "GET",
+    mode: "cors",
+    body: JSON.stringify({ symbol }),
+    headers: {
+      "Content-Type": "application/json",
+    },
+    headers: {
+      Authorization: `bearer ${getAccessToken()}`,
+    },
+  });
+  const data = await res.json();
+  return data.stock;
+};
+
+const purchaseStock = async (symbol, quantity) => {
+  const res = await fetch(PURCHASE_STOCK_URL, {
+    method: "POST",
+    mode: "cors",
+    body: JSON.stringify({ symbol, quantity }),
+    headers: {
+      "Content-Type": "application/json",
+    },
+    headers: {
+      Authorization: `bearer ${getAccessToken()}`,
+    },
+  });
+  const data = await res.json();
+};
+
+const sellOwnedStock = async (symbol, quantity) => {
+  const res = await fetch(SELL_STOCK_URL, {
+    method: "POST",
+    mode: "cors",
+    body: JSON.stringify({ symbol, quantity }),
+    headers: {
+      "Content-Type": "application/json",
+    },
+    headers: {
+      Authorization: `bearer ${getAccessToken()}`,
+    },
+  });
+  const data = await res.json();
+};
+
 module.exports = {
   handleSignIn,
   handleSignUp,
