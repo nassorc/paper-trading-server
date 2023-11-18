@@ -12,14 +12,20 @@ function prependHeaderToBody(header) {
   div.innerHTML = header;
   document.body.prepend(div.firstChild);
 }
-
-async function main() {
-  const res = await fetch("./pages/index.html");
+async function getHTML(htmlPath) {
+  const res = await fetch(htmlPath);
   const html = await res.text();
-
-  const rr = new Router("#app");
-  rr.addRoute("/", html);
-  rr.init();
+  return html;
+}
+async function main() {
+  console.log("SCRIPT RELOADED");
+  const router = new Router("#app");
+  router
+    .addRoute("/", await getHTML("./pages/index.html"))
+    .addRoute("/auth", await getHTML("./pages/auth.html"), () => {
+      initAuthApp();
+    })
+    .init();
 
   const header = await fetchHeader();
   prependHeaderToBody(header);
@@ -27,4 +33,7 @@ async function main() {
 main();
 window.addEventListener("popstate", () => {
   console.log("popping");
+});
+window.addEventListener("beforeunload", () => {
+  console.log("before reload");
 });
