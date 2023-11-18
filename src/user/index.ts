@@ -26,6 +26,7 @@ export default function (
     loginHander
   );
   fastify.post("/signup", registerHandler);
+  fastify.post("/token/validate", validateTokenHandler);
 
   // protected routes
   fastify.register(function (
@@ -69,4 +70,17 @@ async function userHandler(
   );
   // if (!user) return reply.code(404).send({ message: "user not found" });
   return reply.code(200).send(user);
+}
+
+async function validateTokenHandler(
+  this: FastifyInstance,
+  request: FastifyRequest<{ Body: { token: string } }>,
+  reply: FastifyReply
+) {
+  try {
+    const payload = this.jwt.verify(request.body.token);
+    return reply.code(200).send({ valid: true });
+  } catch (err) {
+    return reply.code(200).send({ valid: false });
+  }
 }
