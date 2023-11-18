@@ -1,8 +1,15 @@
 const SIGNUP_URL = "http://localhost:3001/signup";
 const SIGNIN_URL = "http://localhost:3001/signin";
 const VALIDATE_TOKEN_URL = "http://localhost:3001/token/validate";
+const DEPOSIT_FUNDS_URL = "http://localhost:3001/wallet/add-funds";
+const WITHDRAW_FUNDS_URL = "http://localhost:3001/wallet/subtract-funds";
+const GET_WALLET_URL = "http://localhost:3001/wallet";
 const { navigate } = require("./router");
-const { validateCredentials, setLocalStorage } = require("./utils");
+const {
+  validateCredentials,
+  setLocalStorage,
+  getAccessToken,
+} = require("./utils");
 
 const AUTH_RESPONSES = {
   201: "User created",
@@ -76,6 +83,49 @@ const validateToken = async (token) => {
   return data.valid;
 };
 
+const getWallet = async () => {
+  const res = await fetch(GET_WALLET_URL, {
+    method: "GET",
+    mode: "cors",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    headers: {
+      Authorization: `bearer ${getAccessToken()}`,
+    },
+  });
+  const data = await res.json();
+};
+
+const depositFunds = async (amount) => {
+  const res = await fetch(DEPOSIT_FUNDS_URL, {
+    method: "POST",
+    mode: "cors",
+    body: JSON.stringify({ amount }),
+    headers: {
+      "Content-Type": "application/json",
+    },
+    headers: {
+      Authorization: `bearer ${getAccessToken()}`,
+    },
+  });
+  const data = await res.json();
+};
+
+const withdrawFunds = async (amount) => {
+  const res = await fetch(WITHDRAW_FUNDS_URL, {
+    method: "POST",
+    mode: "cors",
+    body: JSON.stringify({ amount }),
+    headers: {
+      "Content-Type": "application/json",
+    },
+    headers: {
+      Authorization: `bearer ${getAccessToken()}`,
+    },
+  });
+  const data = await res.json();
+};
 module.exports = {
   handleSignIn,
   handleSignUp,
