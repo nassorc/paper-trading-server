@@ -1,5 +1,4 @@
-import fastify, {
-  FastifyError,
+import {
   FastifyInstance,
   FastifyPluginOptions,
   FastifyReply,
@@ -35,7 +34,7 @@ export default function (
     next: () => void
   ) {
     fastify.addHook("onRequest", fastify.requireUser);
-    fastify.get("/user/:userId", userHandler);
+    fastify.get("/user/profile", userHandler);
     next();
   });
 
@@ -65,9 +64,8 @@ async function userHandler(
   request: FastifyRequest<{ Params: { userId: string } }>,
   reply: FastifyReply
 ) {
-  const user = await this.userService.getUserById(
-    parseInt(request.params.userId)
-  );
+  const id = (request.user as any).id;
+  const user = await this.userService.getUserProfile({ id });
   // if (!user) return reply.code(404).send({ message: "user not found" });
   return reply.code(200).send(user);
 }
