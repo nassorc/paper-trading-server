@@ -25,7 +25,7 @@ class StockRepository implements IStockRepository {
   }: {
     symbol: string;
   }): Promise<Stock | null> {
-    const stock = await this.db.stock.findFirst({ where: { symbol } });
+    const stock = await this.upsert({ symbol });
     if (!stock) return null;
     return this.toEntity(stock);
   }
@@ -39,7 +39,7 @@ class StockRepository implements IStockRepository {
       },
       update: {},
     });
-    return { id: stock.id };
+    return stock;
   }
   private toEntity(stock: any) {
     return new Stock({

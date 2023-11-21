@@ -37,6 +37,7 @@ describe("StockOrder", () => {
       data: [prefetchStockQuote],
     });
   });
+
   describe("[POST] /stock/buy", () => {
     describe("given order is a single stock and the user has sufficient funds", () => {
       it("should respond with a 200", async () => {
@@ -47,6 +48,7 @@ describe("StockOrder", () => {
         const res = await buyStock(data.buySingleStockPayload, accessToken);
         expect(res.statusCode).toBe(codes.CREATED);
       });
+
       it("should add stock to portfolio", async () => {
         const {
           accessToken,
@@ -63,6 +65,7 @@ describe("StockOrder", () => {
         });
         expect(portfolioRecord?.stocks.length).toBe(1);
       });
+
       it("should subtract purchase amount from the user's wallet", async () => {
         const {
           accessToken,
@@ -79,9 +82,11 @@ describe("StockOrder", () => {
         console.log(data.buySingleStockPayload.price);
         expect(walletRecord?.funds).toBeCloseTo(expectedWalletAmount);
       });
+
       it("should create a transaction order", async () => {});
       // it("should call StockOrderService.purcahseStock once", () => {});
     });
+
     describe("given valid or but user does NOT have sufficient funds", () => {
       it("should NOT make purchase if user does NOT have enough funds", async () => {
         const {
@@ -95,6 +100,7 @@ describe("StockOrder", () => {
         expect(res.statusCode).toBe(400);
       });
     });
+
     describe("given order is missing symbol or quantity", () => {
       it("should response with a 400", async () => {
         const {
@@ -108,6 +114,7 @@ describe("StockOrder", () => {
       });
     });
   });
+
   describe("[POST] /stock/sell", () => {
     describe("given order is a single stock and the user has sufficient funds", () => {});
   });
