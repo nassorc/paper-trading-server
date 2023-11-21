@@ -1,3 +1,3 @@
-import { buildServer } from "../../src/utils/build_server";
+import { buildServer } from "../../src/web/build_server";
 let app = buildServer();
 export default app;

@@ -26,6 +26,8 @@ model User {
   portfolio Portfolio?
   wallet Wallet?
   watchlist Watchlist?
+
+  @@map("user")
 }
 
 model Wallet {
@@ -35,6 +37,8 @@ model Wallet {
   owner User @relation(fields: [ownerId], references: [id], onDelete: Cascade)
   ownerId Int @unique
   history WalletHistory[]
+
+  @@map("wallet")
 }
 
 model WalletHistory {
@@ -46,6 +50,8 @@ model WalletHistory {
   updatedAt DateTime @updatedAt
   wallet Wallet @relation(fields: [walletId], references: [id])
   walletId Int
+
+  @@map("wallet_history")
 }
 
 model Stock {
@@ -56,6 +62,7 @@ model Stock {
   portfolioHoldings PurchasedStock[]
 
   @@index([symbol])
+  @@map("stock")
 }
 
 model StockTransaction {
@@ -68,7 +75,8 @@ model StockTransaction {
   updatedAt DateTime @updatedAt
   user User @relation(fields: [userId], references: [id], onDelete: Cascade) 
   userId Int 
-	@@map("StockOrder")
+  
+	@@map("stock_order")
 }
 
 model Portfolio {
@@ -79,6 +87,7 @@ model Portfolio {
   stocks PurchasedStock[]
 
   @@index([investorId])
+  @@map("portfolio")
 }
 
 model PurchasedStock {
@@ -91,6 +100,7 @@ model PurchasedStock {
   investorId Int
 
   @@unique([symbolId, investorId], name: "stock_portfolio_id")
+  @@map("purchased_stock")
 }
 
 model Watchlist {
@@ -98,4 +108,6 @@ model Watchlist {
   symbols Stock[]
   investor User @relation(fields: [investorId], references: [id], onDelete: Cascade)
   investorId Int @unique
+
+  @@map("watchlist")
 }
