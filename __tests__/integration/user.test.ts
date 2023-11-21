@@ -119,8 +119,8 @@ describe("User", () => {
       });
     });
   });
-  describe("[GET] /user/:userId protected route", () => {
-    describe("given valid userId parameter and given that the user is authenticated", () => {
+  describe("[GET] /user/profile protected route", () => {
+    describe("given that the user is authenticated", () => {
       let token: any;
       let creadedUser: any;
       beforeEach(async () => {
@@ -134,7 +134,7 @@ describe("User", () => {
       it("should response with a 200 status", async () => {
         const res = await app.inject({
           method: "GET",
-          url: `/user/${creadedUser.id}`,
+          url: `/user/profile`,
           headers: {
             authorization: `bearer ${token}`,
           },
@@ -146,10 +146,9 @@ describe("User", () => {
     });
     describe("given user is not authenticate", () => {
       it("should response with a 403 status", async () => {
-        const createdUser = await createUserHelper(registerPayload);
         const res = await app.inject({
           method: "GET",
-          url: `/user/${createdUser.id}`,
+          url: `/user/profile`,
           headers: {
             authorization: "bearer notAToken",
           },
