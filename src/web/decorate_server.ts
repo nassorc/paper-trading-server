@@ -6,13 +6,15 @@ import { walletSchemas } from "../wallet/wallet.schema";
 
 // SERVICES
 import UserService from "../user/user.service";
-import StockDataSourceAPI from "../stock/api";
+import StockMarketAPI from "../stock/api";
 import StockService from "../stock/stock.service";
 import StockOrderService from "../stock/stock_order.service";
 import WalletService from "../wallet/wallet.service";
 import WatchlistService from "../watchlist/watchlist.service";
 import PorfolioService from "../portfolio/portfolio.service";
 import TransactionService from "../transaction/transaction.service";
+
+import StockRepository from "../stock/stock.repository";
 
 declare module "fastify" {
   export interface FastifyInstance {
@@ -51,12 +53,11 @@ export async function decorateFastifyIntance(app: FastifyInstance) {
 
   const stockCollection = await app.db.stock;
   const portfolioCollection = await app.db.portfolio;
-  const stockAPI = new StockDataSourceAPI();
+
+  const stockAPI = new StockMarketAPI();
   const stockService = new StockService({
-    stockAPIClient: stockAPI,
-    walletClient: walletService,
-    portfolioCollection: portfolioCollection,
-    stockCollection: stockCollection,
+    stockMarketAPI: stockAPI,
+    stockRepository: new StockRepository({ db: app.db }),
     cache: app.redis,
   });
   app.decorate("stockService", stockService);

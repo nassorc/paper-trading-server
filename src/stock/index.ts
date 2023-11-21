@@ -53,7 +53,7 @@ async function stockHandler(
   reply: FastifyReply
 ) {
   const symbol = request.params.symbol;
-  const data = await this.stockService.getCachedOrFetchStockQuote(symbol);
+  const data = await this.stockService.getCachedOrFetchStockQuote({ symbol });
 
   return reply.code(200).send(data);
 }

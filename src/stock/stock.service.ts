@@ -1,68 +1,33 @@
-import { IStockDataSource } from "types";
-import WalletService from "../wallet/wallet.service";
-import { Prisma } from "@prisma/client";
-import { AppError, InsufficientFunds } from "../utils/errors";
-import { RedisCommander } from "ioredis";
+import { Dependencies } from "../infrastructure/di";
+import { createCacheKey } from "../utils/create_cachekey";
 
-// TODO! use prisma $transactions to be able to rollback/cancel database commits if any
-// ! operation in a sequence of db calls fails.
-interface StockServiceConstructorType {
-  stockAPIClient: IStockDataSource;
-  walletClient: WalletService;
-  portfolioCollection: Prisma.PortfolioDelegate;
-  stockCollection: Prisma.StockDelegate;
-  cache: RedisCommander;
-}
+type ConstructorType = Pick<
+  Dependencies,
+  "stockRepository" | "stockMarketAPI" | "cache"
+>;
 
 class StockService {
-  stockAPIClient: IStockDataSource;
-  walletClient: WalletService;
-  portfolioCollection: Prisma.PortfolioDelegate;
-  stockCollection: Prisma.StockDelegate;
-  cache: RedisCommander;
+  private stockRepository: Dependencies["stockRepository"];
+  private stockMarketAPI: Dependencies["stockMarketAPI"];
+  private cache: Dependencies["cache"];
 
-  constructor({
-    stockAPIClient,
-    walletClient,
-    portfolioCollection,
-    stockCollection,
-    cache,
-  }: StockServiceConstructorType) {
-    if (
-      !stockAPIClient ||
-      !walletClient ||
-      !portfolioCollection ||
-      !stockCollection ||
-      !cache
-    ) {
-      throw new Error(
-        "Cannot instantiate StockService with missing dependencies"
-      );
-    }
-    this.stockAPIClient = stockAPIClient;
-    this.walletClient = walletClient;
-    this.portfolioCollection = portfolioCollection;
-    this.stockCollection = stockCollection;
+  constructor({ stockRepository, stockMarketAPI, cache }: ConstructorType) {
+    this.stockRepository = stockRepository;
+    this.stockMarketAPI = stockMarketAPI;
     this.cache = cache;
   }
 
-  async getDBStockRef(symbol: string): Promise<{ id: number; symbol: string }> {
-    return await this.stockCollection.upsert({
-      where: {
-        symbol: symbol,
-      },
-      create: {
-        symbol: symbol,
-      },
-      update: {},
-    });
+  async getStockDBRef({ symbol }: { symbol: string }) {
+    return await this.stockRepository.getByStockSymbol({ symbol });
   }
 
-  async getStockQuote(symbol: string) {
-    return await this.stockAPIClient.getStockQuote(symbol);
+  async getStockQuote({ symbol }: { symbol: string }) {
+    return await this.stockMarketAPI.getStockQuote({ symbol });
   }
-  async getCachedOrFetchStockQuote(symbol: string) {
-    const cacheKey = `quote:${symbol}`;
+
+  async getCachedOrFetchStockQuote({ symbol }: { symbol: string }) {
+    // const cacheKey = `quote:${symbol}`;
+    const cacheKey = createCacheKey(symbol);
     const existsInCache = await this.cache.exists(cacheKey);
     // CACHE HIT
     if (existsInCache) {
@@ -70,8 +35,9 @@ class StockService {
       return stockQuote;
     }
     // CACHE MISS
-    const data = await this.getStockQuote(symbol);
+    const data = await this.getStockQuote({ symbol });
     await this.cache.hset(cacheKey, data);
+
     return data;
   }
 }

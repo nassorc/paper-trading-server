@@ -41,7 +41,7 @@ class StockOrderService {
       throw new Error("Cannot parse object as Order");
     }
     const { userId, symbol, quantity } = order;
-    const stockQuote = await this.stockClient.getStockQuote(symbol);
+    const stockQuote = await this.stockClient.getStockQuote({ symbol });
     const total = stockQuote.price * quantity;
     await this.walletClient.check(userId, total);
     // await this.stockClient.getDBStockRef(symbol);
@@ -60,7 +60,7 @@ class StockOrderService {
       throw new Error("Cannot parse object as Order");
     }
     const { userId, symbol, quantity } = order;
-    const stockQuote = await this.stockClient.getStockQuote(symbol);
+    const stockQuote = await this.stockClient.getStockQuote({ symbol });
     const stockToSell = await this.portfolioClient.findStockFromPortfolio(
       userId,
       symbol
