@@ -1,7 +1,7 @@
 import "dotenv/config";
 import axios from "axios";
 import { Redis } from "ioredis";
-import StockDataSourceAPI from "../../src/stock/api";
+import StockMarketAPI from "../../src/stock/api";
 import StockService from "../../src/stock/stock.service";
 import {
   getStockQuoteHelper,

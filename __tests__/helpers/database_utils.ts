@@ -29,7 +29,7 @@ export async function createUserHelper({ username, password }: LoginInputType) {
 export async function loginUserHelper(credentials: Partial<LoginInputType>) {
   return await app.inject({
     method: "POST",
-    url: "/login",
+    url: "/signin",
     body: credentials,
   });
 }
@@ -37,7 +37,7 @@ export async function loginUserHelper(credentials: Partial<LoginInputType>) {
 export async function registerUserHelper(credentials: Partial<LoginInputType>) {
   return await app.inject({
     method: "POST",
-    url: "/register",
+    url: "/signup",
     body: credentials,
   });
 }
@@ -80,12 +80,12 @@ export function createFakeAuthAccessToken(payload: any) {
   return token;
 }
 
-import StockDataSourceAPI from "../../src/stock/api";
+import StockMarketAPI from "../../src/stock/api";
 export async function prefetchStockQuoteFromAPI(symbol: string) {
   let prefetchStockQuote: any;
   try {
-    const api = new StockDataSourceAPI();
-    prefetchStockQuote = await api.getStockQuote(symbol);
+    const api = new StockMarketAPI();
+    prefetchStockQuote = await api.getStockQuote({ symbol });
     return prefetchStockQuote;
   } catch (err: any) {
     prefetchStockQuote = {

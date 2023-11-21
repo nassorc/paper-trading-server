@@ -1,4 +1,4 @@
-import StockDataSourceAPI from "../../src/stock/api";
+import StockMarketAPI from "../../src/stock/api";
 
 const testStockSymbol = "AAPL";
 const testPrice = 101.98;
@@ -6,8 +6,8 @@ const testPrice = 101.98;
 const quote = (async function () {
   let prefetchStockQuote;
   try {
-    const api = new StockDataSourceAPI();
-    prefetchStockQuote = await api.getStockQuote(testStockSymbol);
+    const api = new StockMarketAPI();
+    prefetchStockQuote = await api.getStockQuote({ symbol: testStockSymbol });
   } catch (err: any) {
     prefetchStockQuote = {
       symbol: testStockSymbol,

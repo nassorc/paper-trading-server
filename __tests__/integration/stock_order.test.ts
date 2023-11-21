@@ -31,14 +31,14 @@ async function registerLoginAndAddFunds(amount: number) {
 }
 
 describe("StockOrder", () => {
+  beforeAll(() => {
+    const axiosMocked = axios as jest.Mocked<typeof axios>;
+    axiosMocked.get.mockResolvedValue({
+      data: [prefetchStockQuote],
+    });
+  });
   describe("[POST] /stock/buy", () => {
     describe("given order is a single stock and the user has sufficient funds", () => {
-      beforeAll(() => {
-        const axiosMocked = axios as jest.Mocked<typeof axios>;
-        axiosMocked.get.mockResolvedValue({
-          data: [prefetchStockQuote],
-        });
-      });
       it("should respond with a 200", async () => {
         // const createdUser = await createUserHelper(data.testUser);
         const { accessToken } = await registerLoginAndAddFunds(
@@ -107,5 +107,8 @@ describe("StockOrder", () => {
         expect(res.statusCode).toBe(400);
       });
     });
+  });
+  describe("[POST] /stock/sell", () => {
+    describe("given order is a single stock and the user has sufficient funds", () => {});
   });
 });
