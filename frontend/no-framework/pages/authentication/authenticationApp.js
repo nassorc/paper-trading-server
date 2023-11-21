@@ -1,5 +1,5 @@
-const { handleSignIn, handleSignUp } = require("./actions");
-const { gatherInputs } = require("./utils");
+const { handleSignIn, handleSignUp } = require("../scripts/actions");
+const { gatherInputs } = require("../scripts/utils");
 
 const AUTH_EVENTS = {
   signin: "signin",

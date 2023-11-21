@@ -1,3 +1,5 @@
+const { validateToken } = require("./actions");
+
 const validateCredentials = (credentials) => {
   if ("username" in credentials && "password" in credentials) return true;
   else return false;
@@ -16,9 +18,17 @@ const setLocalStorage = (key, value) => {
 const getAccessToken = () => {
   return localStorage.getItem("accessToken");
 };
+const isAuthenticated = async () => {
+  const token = getAccessToken();
+  if (!token) return false;
+  const isValid = await validateToken(token);
+  if (isValid) return true;
+  else return false;
+};
 module.exports = {
   validateCredentials,
   gatherInputs,
   setLocalStorage,
   getAccessToken,
+  isAuthenticated,
 };

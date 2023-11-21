@@ -1,3 +1,10 @@
+const { navigate } = require("./router");
+const {
+  validateCredentials,
+  setLocalStorage,
+  getAccessToken,
+} = require("./utils");
+
 const API_URL = "http://localhost:3001";
 const SIGNUP_URL = API_URL + "/signup";
 const SIGNIN_URL = API_URL + "/signin";
@@ -9,12 +16,6 @@ const LIST_STOCKS_URL = API_URL + "/stock/list";
 const GET_STOCK_URL = API_URL + "/stock/";
 const PURCHASE_STOCK_URL = API_URL + "/stock/buy";
 const SELL_STOCK_URL = API_URL + "/stock/sell";
-const { navigate } = require("./router");
-const {
-  validateCredentials,
-  setLocalStorage,
-  getAccessToken,
-} = require("./utils");
 
 const AUTH_RESPONSES = {
   201: "User created",
@@ -54,8 +55,8 @@ const handleSignIn = async (credentials) => {
   if (res.ok) {
     const data = await res.json();
     setLocalStorage("accessToken", data.accessToken);
+    navigate("/");
   }
-  navigate("/");
   return getResponseMessage(res.status);
 };
 

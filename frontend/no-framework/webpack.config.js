@@ -3,9 +3,9 @@ module.exports = {
   // entry: path.resolve(__dirname, "scripts", "index.js"),
   mode: "development",
   entry: {
-    index: "./scripts/index.js",
-    auth: "./scripts/authApp.js",
-    userDashboard: "./scripts/userDashboardApp.js",
+    index: "./pages/scripts/index.js",
+    // auth: "./scripts/authApp.js",
+    // userDashboard: "./scripts/userDashboardApp.js",
   },
   output: {
     path: path.resolve(__dirname, "dist"),

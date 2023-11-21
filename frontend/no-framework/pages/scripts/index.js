@@ -1,7 +1,8 @@
 const Router = require("./router");
 const { navigate } = require("./router");
-const { initAuthApp } = require("./authApp");
+const { initAuthApp } = require("../authentication/authenticationApp");
 const { validateToken } = require("./actions");
+require("../userDashboard/userDashboardApp");
 const app = document.querySelector("#app");
 
 const fetchHeader = async () => {
@@ -25,7 +26,7 @@ const initRouter = async () => {
   const requireUser = async () => {
     const accessToken = localStorage.getItem("accessToken");
     if (!accessToken) {
-      navigate("/");
+      navigate("/auth");
     }
     const valid = await validateToken(accessToken);
     if (!valid) {
@@ -34,11 +35,22 @@ const initRouter = async () => {
   };
   const router = new Router("#app");
   router
-    .addRoute("/", await getHTML("./pages/index.html"), [requireUser])
-    .addRoute("/auth", await getHTML("./pages/auth.html"), [], () => {
-      initAuthApp();
-    })
+    .addRoute(
+      "/",
+      await getHTML("./pages/userDashboard/userDashboardPage.html"),
+      [requireUser]
+    )
+    .addRoute(
+      "/auth",
+      await getHTML("./pages/authentication/authenticationPage.html"),
+      [],
+      () => {
+        initAuthApp();
+      }
+    )
     .init();
+};
+
 async function main() {
   initRouter();
   const headerContent = await fetchHeader();
@@ -52,5 +64,14 @@ async function main() {
     }
   });
 
+  let timer;
+  document
+    .querySelector("#searchbar__input")
+    .addEventListener("input", async (e) => {
+      clearTimeout(timer);
+      timer = setTimeout(() => {
+        console.log(e.target.value);
+      }, 1000);
+    });
 }
 main();
