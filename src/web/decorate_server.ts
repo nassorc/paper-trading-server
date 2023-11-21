@@ -15,6 +15,7 @@ import PorfolioService from "../portfolio/portfolio.service";
 import TransactionService from "../transaction/transaction.service";
 
 import StockRepository from "../stock/stock.repository";
+import UserRepository from "../user/user.repository";
 
 declare module "fastify" {
   export interface FastifyInstance {
@@ -40,7 +41,8 @@ export async function decorateFastifyIntance(app: FastifyInstance) {
   }
   // SERVICES
   const userCollection = await app.db.user;
-  const userService = new UserService(userCollection);
+  const userRepository = new UserRepository({ db: app.db });
+  const userService = new UserService({ userRepository });
   app.decorate("userService", userService);
 
   const walletCollection = await app.db.wallet;
