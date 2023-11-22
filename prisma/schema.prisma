@@ -19,7 +19,7 @@ enum StockOrderType {
 }
 
 model User {
-  id Int @id @unique @default(autoincrement())
+  id Int @id @unique @default(autoincrement()) @map("user_id")
   username String @unique @db.VarChar(64)
   password String @db.VarChar(64)
   transactions StockTransaction[]
@@ -31,59 +31,59 @@ model User {
 }
 
 model Wallet {
-  id Int @id @default(autoincrement())
+  id Int @id @default(autoincrement()) @map("wallet_id")
   funds Float @default(0)
-  totalAmount Float @default(0)
+  totalAmount Float @default(0) @map("total_amount")
   owner User @relation(fields: [ownerId], references: [id], onDelete: Cascade)
-  ownerId Int @unique
+  ownerId Int @unique @map("user_id")
   history WalletHistory[]
 
   @@map("wallet")
 }
 
 model WalletHistory {
-  id Int @id @default(autoincrement())
+  id Int @id @default(autoincrement()) @map("wallet_history_id")
   type WalletTransactionType 
-  transactionAmount Float 
-  runningBalance Float
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  transactionAmount Float @map("transaction_amount")
+  runningBalance Float @map("running_balance")
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
   wallet Wallet @relation(fields: [walletId], references: [id])
-  walletId Int
+  walletId Int @map("wallet_id")
 
   @@map("wallet_history")
 }
 
 model Stock {
-  id Int @id @default(autoincrement())
+  id Int @id @default(autoincrement()) @map("stock_id")
   symbol String @db.VarChar(64) @unique
   transaction StockTransaction[] 
   watchlists Watchlist[]
-  portfolioHoldings PurchasedStock[]
+  portfolioHoldings PurchasedStock[] 
 
   @@index([symbol])
   @@map("stock")
 }
 
 model StockTransaction {
-  id Int @id @default(autoincrement())
+  id Int @id @default(autoincrement()) @map("stock_order_id")
   stock Stock[]
-  orderAmount Float
+  orderAmount Float @map("order_amount")
   quantity Int
   type StockOrderType
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
   user User @relation(fields: [userId], references: [id], onDelete: Cascade) 
-  userId Int 
+  userId Int @map("user_id")
   
 	@@map("stock_order")
 }
 
 model Portfolio {
-  id Int @id @default(autoincrement())
+  id Int @id @default(autoincrement()) @map("portfolio_id")
   gains Float @default(0)
   investor User @relation(fields: [investorId], references: [id], onDelete: Cascade)
-  investorId Int @unique
+  investorId Int @unique @map("investor_id")
   stocks PurchasedStock[]
 
   @@index([investorId])
@@ -91,23 +91,23 @@ model Portfolio {
 }
 
 model PurchasedStock {
-  id Int @id @default(autoincrement())
+  id Int @id @default(autoincrement()) @map("purcahsed_stock_id")
   symbol Stock @relation(fields: [symbolId], references: [id])
-  symbolId Int
-  quantity Int
+  symbolId Int @map("symbol_id")
+  quantity Int 
   portfolio Portfolio @relation(fields: [portfolioId], references: [id], onDelete: Cascade)
-  portfolioId Int 
-  investorId Int
+  portfolioId Int @map("portfolio_id")
+  investorId Int @map("investor_id")
 
   @@unique([symbolId, investorId], name: "stock_portfolio_id")
   @@map("purchased_stock")
 }
 
 model Watchlist {
-  id Int @id @default(autoincrement())
+  id Int @id @default(autoincrement()) @map("watchlist_id")
   symbols Stock[]
   investor User @relation(fields: [investorId], references: [id], onDelete: Cascade)
-  investorId Int @unique
+  investorId Int @unique @map("investor_id")
 
   @@map("watchlist")
 }

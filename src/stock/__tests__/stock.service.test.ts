@@ -1,9 +1,9 @@
-import WalletService from "../wallet/wallet.service";
-import StockAPI from "./api";
-import prisma from "../libs/prisma";
-import Redis from "../libs/redis";
+import WalletService from "../../wallet/wallet.service";
+import StockAPI from "../api";
+import prisma from "../../libs/prisma";
+import Redis from "../../libs/redis";
 import { DeepMockProxy, mockDeep, mockReset } from "jest-mock-extended";
-import StockService from "./stock.service";
+import StockService from "../stock.service";
 
 const redis = new Redis();
 
@@ -87,7 +87,7 @@ describe("StockService", () => {
       };
       // @ts-ignore
       mockedPrisma.stock.upsert.mockReturnValue(stock);
-      const stockRef = await stockService.getDBStockRef(stock.symbol);
+      const stockRef = await stockService.getStockDBRef(stock.symbol);
       expect(stockRef).toEqual(stock);
     });
   });

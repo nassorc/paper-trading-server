@@ -36,6 +36,7 @@ class StockOrderService {
     this.portfolioClient = portfolioClient;
     this.transactionClient = transactionClient;
   }
+
   async createBuyOrder(order: StockOrderType) {
     if (!this.parseOrder(order)) {
       throw new Error("Cannot parse object as Order");
@@ -55,6 +56,7 @@ class StockOrderService {
     });
     // throw new Error("error");
   }
+
   async createSellOrder(order: StockOrderType) {
     if (!this.parseOrder(order)) {
       throw new Error("Cannot parse object as Order");
@@ -91,6 +93,7 @@ class StockOrderService {
       quantity: quantity,
     });
   }
+
   private parseOrder(order: StockOrderType): order is StockOrderType {
     return "userId" in order && "symbol" in order && "quantity" in order;
   }

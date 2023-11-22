@@ -1,4 +1,4 @@
-import StockDataSourceAPI from "./api";
+import StockMarketAPI from "../api";
 import axios from "axios";
 
 const stockQuoteOutput = {
@@ -6,7 +6,7 @@ const stockQuoteOutput = {
   price: 100,
   volume: 1000,
 };
-const api = new StockDataSourceAPI();
+const api = new StockMarketAPI();
 const spyOnget = jest.spyOn(axios, "get");
 spyOnget.mockResolvedValue({ data: [stockQuoteOutput] });
 

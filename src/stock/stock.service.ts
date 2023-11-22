@@ -18,7 +18,7 @@ class StockService {
   }
 
   async getStockDBRef({ symbol }: { symbol: string }) {
-    return await this.stockRepository.getByStockSymbol({ symbol });
+    return await this.stockRepository.findOrCreate({ symbol });
   }
 
   async getStockQuote({ symbol }: { symbol: string }) {
@@ -26,7 +26,6 @@ class StockService {
   }
 
   async getCachedOrFetchStockQuote({ symbol }: { symbol: string }) {
-    // const cacheKey = `quote:${symbol}`;
     const cacheKey = createCacheKey(symbol);
     const existsInCache = await this.cache.exists(cacheKey);
     // CACHE HIT

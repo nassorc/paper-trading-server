@@ -5,5 +5,6 @@ export interface IStockRepository {
   delete(params: { id: number }): Promise<void>;
   getByStockSymbol(params: { symbol: string }): Promise<Stock | null>;
   getById(params: { id: number }): Promise<Stock | null>;
-  upsert(params: { symbol: string }): Promise<{ id: number }>;
+  upsert(params: { stock: Stock }): Promise<{ id: number }>;
+  findOrCreate(params: { symbol: string }): Promise<Stock | null>;
 }

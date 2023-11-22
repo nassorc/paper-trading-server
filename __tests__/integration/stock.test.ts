@@ -40,15 +40,18 @@ describe("Stock", () => {
           data: [prefetchStockQuote],
         });
       });
+
       it("should response with a 200 status", async () => {
         const res = await getStockQuoteHelper(testStock);
         expect(res.statusCode).toBe(codes.OK);
       });
+
       it("should return stock quote", async () => {
         const res = await getStockQuoteHelper(testStock);
         const data = await res.json();
         expect(prefetchStockQuote).toEqual(data);
       });
+
       it("should make a call to the api once", async () => {
         jest.spyOn(StockService.prototype, "getStockQuote");
         jest.spyOn(StockService.prototype, "getCachedOrFetchStockQuote");
@@ -58,6 +61,7 @@ describe("Stock", () => {
           StockService.prototype.getCachedOrFetchStockQuote
         ).toBeCalledTimes(1);
       });
+
       it("should create a cache entry", async () => {
         const res = await getStockQuoteHelper(testStock);
         const data = await redis.hgetall(stockCacheKey);
@@ -65,6 +69,7 @@ describe("Stock", () => {
           prefetchStockQuote
         );
       });
+
       it("should NOT attempt to fetch the data from the cache", async () => {
         const spy = jest.spyOn(app.redis, "hgetall");
         const res = await getStockQuoteHelper(testStock);
@@ -78,6 +83,7 @@ describe("Stock", () => {
         const data = await res.json();
         expect(data).toEqual(prefetchStockQuote);
       });
+
       it("should contain a cache entry of the stock", async () => {
         let entry = await redis.hgetall(stockCacheKey);
         expect(entry).toEqual({});
@@ -87,6 +93,7 @@ describe("Stock", () => {
           prefetchStockQuote
         );
       });
+
       it("should NOT call the stock api", async () => {
         redis.hset(stockCacheKey, prefetchStockQuote);
         jest.spyOn(StockService.prototype, "getStockQuote");
