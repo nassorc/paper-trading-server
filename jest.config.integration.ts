@@ -3,7 +3,7 @@ import type { Config } from "jest";
 const config: Config = {
   preset: "ts-jest",
   testEnvironment: "node",
-  verbose: false,
+  verbose: true,
   forceExit: true,
   rootDir: ".",
   roots: ["./__tests__/integration/"],
