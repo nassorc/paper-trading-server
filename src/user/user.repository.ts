@@ -32,6 +32,9 @@ class UserRepository implements IUserRepository {
   async getById({ id }: { id: number }) {
     const user = await this.db.user.findFirst({
       where: { id },
+      include: {
+        wallet: true,
+      },
     });
     if (!user) return null;
     return user;

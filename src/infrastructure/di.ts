@@ -4,6 +4,7 @@ import StockMarketAPI from "../stock/api";
 
 import StockRepository from "../stock/repositories/stock.repository";
 import UserRepository from "../user/user.repository";
+import WalletRepository from "../wallet/wallet.repository";
 
 export interface Dependencies {
   db: PrismaClient;
@@ -11,4 +12,5 @@ export interface Dependencies {
   stockMarketAPI: StockMarketAPI;
   stockRepository: StockRepository;
   userRepository: UserRepository;
+  walletRepository: WalletRepository;
 }
