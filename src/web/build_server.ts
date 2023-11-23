@@ -20,6 +20,19 @@ import { Server } from "socket.io";
 import { attachWatchlist } from "./attach_watchlist";
 import cors from "@fastify/cors";
 
+//ws.twelvedata.com/v1/quotes/price?apikey=1ff192f9bc354f349eeb9cffe7fe8fb1
+import WebSocket from "ws";
+let sample = {
+  event: "price",
+  symbol: "AAPL",
+  currency: "USD",
+  exchange: "NASDAQ",
+  mic_code: "XNGS",
+  type: "Common Stock",
+  timestamp: 1700528335,
+  price: 191.58,
+};
+
 declare module "fastify" {
   interface FastifyInstance {
     io: Server<{ hello: string }>;
@@ -28,26 +41,63 @@ declare module "fastify" {
 
 let timer: any;
 
+let cache: any = {};
+let id: string;
+
 async function io(app: FastifyInstance) {
   app.ready(async () => {
-    app.io.use(makeSocketRequireUser(app)); // jwt token authentication
-    app.io.use(attachWatchlist(app)); // attaches user's watch list to socket instance
-    app.io.on("connection", (socket: any) => {
-      if (!timer) {
-        timer = setInterval(async () => {
-          const updatedWatchlist = await Promise.all(
-            socket.watchlist.map(async (stock: string) => {
-              return await app.stockService.getCachedOrFetchStockQuote(stock);
-            })
-          );
-          socket.emit("stock:minute-update", {
-            id: socket.user.id,
-            data: updatedWatchlist,
+    // websocket client
+    const ws = new WebSocket(
+      "wss://ws.twelvedata.com/v1/quotes/price?apikey=1ff192f9bc354f349eeb9cffe7fe8fb1"
+    );
+    ws.on("open", () => {
+      app.io.use(makeSocketRequireUser(app)); // jwt token authentication
+      app.io.on("connection", async (socket: any) => {
+        id = String(socket.user.id);
+        socket.join(id);
+
+        // socket.emit("greetings", "hello user");
+        app.log.info(`${socket.user.id} connected`);
+
+        const watchlist = ["AAPL", "BTC/USD"];
+        const watchlists: any = {
+          1: ["AAPL", "BTC/USD"],
+          134: ["EUR/USD"],
+        };
+
+        watchlists[socket.user.id].forEach((symbol: string) => {
+          socket.join(symbol);
+          if (symbol in cache) {
+            cache[symbol].push(socket.user.id);
+          } else {
+            ws.send(
+              JSON.stringify({
+                action: "subscribe",
+                params: {
+                  symbols: symbol,
+                },
+              })
+            );
+            cache[symbol] = [socket.user.id];
+          }
+        });
+
+        cache["AAPL"].forEach((id: number) => console.log(id));
+      });
+      ws.on("message", (data) => {
+        const info = JSON.parse(data.toString());
+        if (info.event === "price") {
+          console.log(info.symbol);
+          cache[info.symbol].forEach((id: number) => {
+            let fId = String(id);
+            // @ts-ignore
+            app.io.of("/").in(fId).emit("price", JSON.stringify(info));
           });
-        }, 2000);
-      }
-      socket.on("disconnect", () => {
-        socket.disconnect();
+        }
+        // users.forEach(() => {
+        //   socket.emit("price", info);
+        // });
+        console.log(JSON.parse(data.toString()));
       });
     });
   });
