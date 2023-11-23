@@ -63,23 +63,6 @@ class WalletService {
     return wallet as any as Wallet;
   }
 
-  async updateTotalAmount(userId: number, amount: number) {
-    try {
-      const wallet = await this.walletRepository.getByUserId({ id: userId });
-      if (!wallet) {
-        throw new NotFound("WalletNotFound");
-      }
-      wallet.totalAmount += amount;
-
-      await this.walletRepository.update({ wallet });
-    } catch (err: any) {
-      if (err.code == RECORD_NOT_FOUND_CODE) {
-        throw new NotFound("WalletNotFound");
-      }
-      throw err;
-    }
-  }
-
   async check(userId: number, amount: number) {
     const wallet = await this.walletRepository.getByUserId({ id: userId });
     if (!wallet) {
