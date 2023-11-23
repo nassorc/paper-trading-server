@@ -55,7 +55,6 @@ async function addFundsHander(
   // @ts-ignore
   const userId = request.user.id;
   const updatedWallet = await this.walletService.addAmount(userId, amount);
-  await this.walletService.updateTotalAmount(userId, amount);
 
   return reply
     .code(201)
@@ -71,7 +70,6 @@ async function subtractFundsHander(
   // @ts-ignore
   const userId = request.user.id;
   await this.walletService.subtractAmount(userId, amount);
-  await this.walletService.updateTotalAmount(userId, amount * -1);
 
   return reply.code(201).send({ message: "amount added" });
 }

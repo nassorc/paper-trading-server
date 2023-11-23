@@ -14,8 +14,9 @@ import WatchlistService from "../watchlist/watchlist.service";
 import PorfolioService from "../portfolio/portfolio.service";
 import TransactionService from "../transaction/transaction.service";
 
-import StockRepository from "../stock/stock.repository";
+import StockRepository from "../stock/repositories/stock.repository";
 import UserRepository from "../user/user.repository";
+import WalletRepository from "../wallet/wallet.repository";
 
 declare module "fastify" {
   export interface FastifyInstance {
@@ -46,7 +47,8 @@ export async function decorateFastifyIntance(app: FastifyInstance) {
   app.decorate("userService", userService);
 
   const walletCollection = await app.db.wallet;
-  const walletService = new WalletService(walletCollection);
+  const walletRepository = new WalletRepository({ db: app.db });
+  const walletService = new WalletService({ walletRepository });
   app.decorate("walletService", walletService);
 
   const watchlistCollection = await app.db.watchlist;

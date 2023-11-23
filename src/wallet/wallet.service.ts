@@ -1,37 +1,28 @@
-import { Prisma } from "@prisma/client";
 import {
   AppError,
   InsufficientFunds,
   NotFound,
   RECORD_NOT_FOUND_CODE,
 } from "../utils/errors";
-import { Optional } from "types";
-
-type WalletType = {
-  id: number;
-  funds: number;
-  totalAmount: number;
-  ownerId: number;
-};
-
-type WalletOptionalId = Optional<WalletType, "id">;
+import { Dependencies } from "../infrastructure/di";
+import Wallet from "./wallet";
 
 class WalletService {
-  constructor(private walletCollection: Prisma.WalletDelegate) {}
+  private walletRepository: Dependencies["walletRepository"];
+  constructor({ walletRepository }: Pick<Dependencies, "walletRepository">) {
+    this.walletRepository = walletRepository;
+  }
 
   async addAmount(userId: number, amount: number) {
     try {
-      const userWallet = await this.getWalletByUserId(userId);
-      const updatedFunds = userWallet.funds + amount;
+      const wallet = await this.walletRepository.getByUserId({ id: userId });
+      if (!wallet) {
+        throw new NotFound("WalletNotFound");
+      }
 
-      return await this.walletCollection.update({
-        where: {
-          ownerId: userId,
-        },
-        data: {
-          funds: updatedFunds,
-        },
-      });
+      wallet.deposit({ amount });
+      wallet.totalAmount += amount;
+      return await this.walletRepository.update({ wallet });
     } catch (err: any | { code: string }) {
       if (err.code == RECORD_NOT_FOUND_CODE) {
         throw new NotFound("WalletNotFound");
@@ -42,20 +33,20 @@ class WalletService {
 
   async subtractAmount(userId: number, amount: number) {
     try {
-      const userWallet = await this.getWalletByUserId(userId);
-      const updatedFunds = userWallet.funds - amount;
-      if (updatedFunds < 0) {
+      const wallet = await this.walletRepository.getByUserId({ id: userId });
+      if (!wallet) {
+        throw new NotFound("WalletNotFound");
+      }
+
+      wallet.withdraw({ amount });
+      wallet.totalAmount -= amount;
+
+      if (!wallet) throw new AppError("Cannot find user's wallet", 400);
+      if (wallet.funds < 0) {
         throw new InsufficientFunds();
       }
-      await this.walletCollection.update({
-        where: {
-          ownerId: userId,
-        },
-        data: {
-          funds: { set: updatedFunds },
-          // funds: updatedFunds,
-        },
-      });
+      await this.walletRepository.update({ wallet });
+      return { fund: wallet.funds };
     } catch (err: any) {
       if (err.code == RECORD_NOT_FOUND_CODE) {
         throw new NotFound("WalletNotFound");
@@ -64,28 +55,23 @@ class WalletService {
     }
   }
 
-  async getWalletByUserId(userId: number): Promise<WalletType> {
-    const wallet = await this.walletCollection.findFirst({
-      where: {
-        ownerId: userId,
-      },
-    });
-    if (!wallet) throw new NotFound();
-    return wallet as any as WalletType;
+  async getWalletByUserId(userId: number): Promise<Wallet> {
+    const wallet = await this.walletRepository.getByUserId({ id: userId });
+    if (!wallet) {
+      throw new NotFound("WalletNotFound");
+    }
+    return wallet as any as Wallet;
   }
 
   async updateTotalAmount(userId: number, amount: number) {
     try {
-      const userWallet = await this.getWalletByUserId(userId);
-      const newTotal = userWallet.totalAmount + amount;
-      await this.walletCollection.update({
-        where: {
-          ownerId: userId,
-        },
-        data: {
-          totalAmount: newTotal,
-        },
-      });
+      const wallet = await this.walletRepository.getByUserId({ id: userId });
+      if (!wallet) {
+        throw new NotFound("WalletNotFound");
+      }
+      wallet.totalAmount += amount;
+
+      await this.walletRepository.update({ wallet });
     } catch (err: any) {
       if (err.code == RECORD_NOT_FOUND_CODE) {
         throw new NotFound("WalletNotFound");
@@ -95,15 +81,11 @@ class WalletService {
   }
 
   async check(userId: number, amount: number) {
-    const wallet = await this.walletCollection.findFirst({
-      where: {
-        ownerId: userId,
-      },
-    });
+    const wallet = await this.walletRepository.getByUserId({ id: userId });
     if (!wallet) {
-      throw new AppError("Could not find user wallet", 400);
+      throw new NotFound("WalletNotFound");
     }
-    return amount <= wallet?.funds;
+    return amount <= wallet.funds;
   }
 }
 
