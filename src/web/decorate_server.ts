@@ -63,6 +63,7 @@ export async function decorateFastifyIntance(app: FastifyInstance) {
     stockMarketAPI: stockAPI,
     stockRepository: new StockRepository({ db: app.db }),
     cache: app.redis,
+    stockWebsocketClient: undefined,
   });
   app.decorate("stockService", stockService);
 

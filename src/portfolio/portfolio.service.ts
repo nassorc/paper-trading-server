@@ -14,90 +14,96 @@ class PorfolioService {
     private portfolioCollection: Prisma.PortfolioDelegate
   ) {}
   async addStockInvestment(userId: number, symbol: string, quantity: number) {
-    const stockDBRef = await this.stockClient.getDBStockRef(symbol);
-    await this.portfolioCollection.update({
-      where: {
-        investorId: userId,
-      },
-      data: {
-        stocks: {
-          upsert: {
-            where: {
-              stock_portfolio_id: {
-                investorId: userId,
-                symbolId: stockDBRef.id,
+    const stockDBRef = await this.stockClient.getStockDBRef({ symbol });
+    if (stockDBRef != null && stockDBRef.id) {
+      await this.portfolioCollection.update({
+        where: {
+          investorId: userId,
+        },
+        data: {
+          stocks: {
+            upsert: {
+              where: {
+                stock_portfolio_id: {
+                  investorId: userId,
+                  symbolId: stockDBRef.id,
+                },
               },
-            },
-            create: {
-              quantity,
-              investorId: userId,
-              symbol: {
-                connectOrCreate: {
-                  where: {
-                    symbol: symbol,
-                  },
-                  create: {
-                    symbol: symbol,
+              create: {
+                quantity,
+                investorId: userId,
+                symbol: {
+                  connectOrCreate: {
+                    where: {
+                      symbol: symbol,
+                    },
+                    create: {
+                      symbol: symbol,
+                    },
                   },
                 },
               },
-            },
-            update: {
-              quantity: {
-                increment: quantity,
+              update: {
+                quantity: {
+                  increment: quantity,
+                },
               },
             },
           },
         },
-      },
-    });
+      });
+    }
   }
   async reduceStockInvestmentQuantity(
     userId: number,
     symbol: string,
     quantity: number
   ) {
-    const stockDBRef = await this.stockClient.getDBStockRef(symbol);
-    await this.portfolioCollection.update({
-      where: {
-        investorId: userId,
-      },
-      data: {
-        stocks: {
-          update: {
-            where: {
+    const stockDBRef = await this.stockClient.getStockDBRef({ symbol });
+    if (stockDBRef != null && stockDBRef.id) {
+      await this.portfolioCollection.update({
+        where: {
+          investorId: userId,
+        },
+        data: {
+          stocks: {
+            update: {
+              where: {
+                stock_portfolio_id: {
+                  investorId: userId,
+                  symbolId: stockDBRef.id,
+                },
+              },
+              data: {
+                quantity: {
+                  decrement: quantity,
+                },
+              },
+            },
+          },
+        },
+      });
+    }
+  }
+  async removeStockInvestment(userId: number, symbol: string) {
+    const stockDBRef = await this.stockClient.getStockDBRef({ symbol });
+    if (stockDBRef != null && stockDBRef.id) {
+      await this.portfolioCollection.update({
+        where: {
+          investorId: userId,
+        },
+        data: {
+          stocks: {
+            delete: {
               stock_portfolio_id: {
                 investorId: userId,
                 symbolId: stockDBRef.id,
               },
             },
-            data: {
-              quantity: {
-                decrement: quantity,
-              },
-            },
           },
         },
-      },
-    });
-  }
-  async removeStockInvestment(userId: number, symbol: string) {
-    const stockDBRef = await this.stockClient.getDBStockRef(symbol);
-    await this.portfolioCollection.update({
-      where: {
-        investorId: userId,
-      },
-      data: {
-        stocks: {
-          delete: {
-            stock_portfolio_id: {
-              investorId: userId,
-              symbolId: stockDBRef.id,
-            },
-          },
-        },
-      },
-    });
+      });
+    }
   }
   async hasInvestment(userId: string, stock: string): Promise<boolean> {
     throw new Error("not yet implemented");

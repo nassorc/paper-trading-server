@@ -34,6 +34,11 @@ class UserRepository implements IUserRepository {
       where: { id },
       include: {
         wallet: true,
+        watchlist: {
+          include: {
+            symbols: true,
+          },
+        },
       },
     });
     if (!user) return null;

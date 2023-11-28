@@ -1,3 +1,18 @@
+// function MakeWallet({ currency }: any) {
+//   if (!currency) throw new Error("Missing dependencies to construct a wallet");
+//   return function ({ amount }: any) {
+//     return Object.freeze({
+//       deposit() {
+//         return amount;
+//       },
+//     });
+//   };
+// }
+
+// const makeWallet = MakeWallet({ currency: "curency" });
+// const wallet = makeWallet({amount: 100});
+// wallet.deposit()
+
 class Wallet {
   public id?: number;
   public ownerId?: number;

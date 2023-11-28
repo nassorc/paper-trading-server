@@ -1,8 +1,6 @@
-import { Watchlist as WatchlistModel } from "@prisma/client";
 import { Dependencies } from "../infrastructure/di";
 import { IWatchlistRepository } from "./IWatchlistRepository";
 import Watchlist from "./watchlist";
-import { symbol } from "zod";
 
 class WatchlistRepository implements IWatchlistRepository {
   private db: Dependencies["db"];
