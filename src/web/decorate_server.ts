@@ -17,6 +17,7 @@ import TransactionService from "../transaction/transaction.service";
 import StockRepository from "../stock/repositories/stock.repository";
 import UserRepository from "../user/user.repository";
 import WalletRepository from "../wallet/wallet.repository";
+import StockWebSocketClient from "../infrastructure/stockWebSocketClient";
 
 declare module "fastify" {
   export interface FastifyInstance {
@@ -63,7 +64,7 @@ export async function decorateFastifyIntance(app: FastifyInstance) {
     stockMarketAPI: stockAPI,
     stockRepository: new StockRepository({ db: app.db }),
     cache: app.redis,
-    stockWebsocketClient: undefined,
+    stockWebsocketClient: StockWebSocketClient.getInstance(),
   });
   app.decorate("stockService", stockService);
 
