@@ -1,26 +1,37 @@
-class StockWebSocketClient {
+import { EventEmitter } from "events";
+import WebSocket from "ws";
+
+class StockWebSocketClient extends EventEmitter {
+  public PRICE_CHANGE = "price";
+
   private static instance: StockWebSocketClient;
   private server: any;
 
   private constructor() {
+    super();
+
     const ws = new WebSocket(
       "wss://ws.twelvedata.com/v1/quotes/price?apikey=1ff192f9bc354f349eeb9cffe7fe8fb1"
     );
+
     this.server = ws;
     this.init();
   }
+
   private init() {
-    this.server.on("open", () => {
-      console.log("Stock WebSocket connected");
+    this.addServerListeners();
+  }
+
+  async addServerListeners() {
+    const WS_MESSAGE = "message";
+    await this.server.on("open", async () => {});
+    await this.server.on(WS_MESSAGE, async (data: any) => {
+      this.emit(this.PRICE_CHANGE, data);
     });
   }
 
   async send(message: any) {
-    this.server.send(JSON.stringify(message));
-  }
-
-  async messageListener(fn: (...args: any) => void) {
-    this.server.on("message", fn);
+    await this.server.send(JSON.stringify(message));
   }
 
   static getInstance(): StockWebSocketClient {
