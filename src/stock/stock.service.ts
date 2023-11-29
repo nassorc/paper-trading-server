@@ -1,4 +1,3 @@
-import { IObserver, ISubject } from "types";
 import { Dependencies } from "../infrastructure/di";
 import { createCacheKey } from "../utils/create_cachekey";
 import StockWebSocketClient from "../infrastructure/stockWebSocketClient";
@@ -36,12 +35,11 @@ type ConstructorType = Pick<
 //   }
 // }
 
-class StockService implements ISubject {
+class StockService {
   private stockRepository: Dependencies["stockRepository"];
   private stockMarketAPI: Dependencies["stockMarketAPI"];
   private cache: Dependencies["cache"];
   private stockWebSocketClient: Dependencies["stockWebsocketClient"] | null;
-  private observers: IObserver[] = [];
 
   constructor({
     stockRepository,
@@ -63,7 +61,7 @@ class StockService implements ISubject {
   }
 
   init() {
-    this.stockWebSocketClient?.messageListener(this.notify);
+    // this.stockWebSocketClient?.messageListener(this.notify);
   }
 
   async getStockDBRef({ symbol }: { symbol: string }) {
@@ -89,7 +87,11 @@ class StockService implements ISubject {
     return data;
   }
 
-  async subscribeRealtimeUpdates({ symbols }: { symbols: string | string[] }) {
+  async subscribeToRealtimeUpdates({
+    symbols,
+  }: {
+    symbols: string | string[];
+  }) {
     if (this.stockWebSocketClient) {
       if (typeof symbols === "string") {
         await this.stockWebSocketClient.send({
@@ -109,21 +111,13 @@ class StockService implements ISubject {
     }
   }
 
-  // ISUBJECT METHODS ==================================================
-  attach(o: IObserver): void {
-    if (this.observers.find((observer) => observer === o)) return;
-    this.observers.push(o);
-  }
-
-  detach(o: IObserver): void {
-    let updated = this.observers.filter((observer) => observer != o);
-    this.observers = updated;
-  }
-
-  notify(data: any): void {
-    this.observers.forEach((o) => {
-      o.update(this, data);
-    });
+  async onRealtimeUpdates(handler: (...args: any) => any) {
+    if (this.stockWebSocketClient) {
+      this.stockWebSocketClient.on(
+        this.stockWebSocketClient.PRICE_CHANGE,
+        handler
+      );
+    }
   }
 }
 
