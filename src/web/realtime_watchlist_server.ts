@@ -7,6 +7,8 @@ class RealtimeWatchlistServer {
   private stockService: StockService;
   private middlewares: any[];
 
+  private stockToUserMap: any = {};
+
   constructor({
     server,
     stockService,
@@ -34,89 +36,40 @@ class RealtimeWatchlistServer {
       await this.server.use(m);
     });
     this.server.on("connection", async (socket: any) => {
-      console.log(`user ${socket.id} connected.`);
-      console.dir(socket.user, { depth: Infinity });
-      this.stockService.subscribeToRealtimeUpdates({ symbols: "BTC/USD" });
-      this.stockService.onRealtimeUpdates((data: any) => {
-        this.server.emit("price", data);
-      });
+      const socketId = socket.id;
+      const userId = String(socket.user.id);
+
+      socket.join(String(userId));
+
+      for (const stock of socket.watchlist) {
+        if (stock in this.stockToUserMap) {
+          this.stockToUserMap[stock].push(userId);
+        } else {
+          // subscribe user's watchlist to realtime updates
+          await this.stockService.subscribeToRealtimeUpdates({
+            symbols: socket.watchlist,
+          });
+          this.stockToUserMap[stock] = [userId];
+        }
+      }
     });
+
+    this.stockService.onRealtimeUpdates((data: any) => {
+      const info = JSON.parse(data.toString());
+      const symbol = info.symbol;
+
+      if (symbol && this.stockToUserMap[symbol]) {
+        this.stockToUserMap[symbol].forEach((id: string) => {
+          this.server
+            .of("/")
+            .in(id)
+            .emit("price", this.toPayload(data.toString()));
+        });
+      }
+    });
+  }
+  toPayload(data: { symbol: string; timestamp: number; price: number }) {
+    return data;
   }
 }
 export default RealtimeWatchlistServer;
-
-// let timer: any;
-// let cache: any = {};
-// let id: string;
-// let watchlists: any = {};
-
-// // PLAN: decouple WS Stock API from Server socket
-// // 1. Create WS class that connects to the api's ws
-// // 2. Create Socket class for server/client comms
-// // 3. create itermediary pub/sub that both ws and socket class will use to communicate
-// // 4. create cache to map symbol/users
-
-// async function io(app: FastifyInstance) {
-//   app.ready(async () => {
-//     // websocket client
-//     const ws = new WebSocket(
-//       "wss://ws.twelvedata.com/v1/quotes/price?apikey=1ff192f9bc354f349eeb9cffe7fe8fb1"
-//     );
-
-//     ws.on("open", () => {
-//       // require authenticated user
-//       app.io.use(makeSocketRequireUser(app));
-
-//       app.io.on("connection", async (socket: any) => {
-//         console.dir(socket.user, { depth: Infinity });
-//         id = String(socket.user.id);
-//         socket.join(id);
-
-//         app.log.info(`${socket.user.id} connected`);
-
-//         const res = await app.watchlistService.getUserWatchlist(socket.user.id);
-//         const userWatchlist = res?.symbols.map((stock) => stock.symbol);
-//         console.log(userWatchlist);
-
-//         watchlists[Number(id)] = userWatchlist;
-//         watchlists[Number(id)].push("BTC/USD");
-
-//         // const watchlists: any = {
-//         //   134: ["AAPL", "BTC/USD"],
-//         //   1: ["EUR/USD"],
-//         // };
-//         console.log(watchlists);
-
-//         watchlists[socket.user.id].forEach((symbol: string) => {
-//           socket.join(symbol);
-//           if (symbol != "META") {
-//             if (symbol in cache) {
-//               cache[symbol].push(socket.user.id);
-//             } else {
-//               ws.send(
-//                 JSON.stringify({
-//                   action: "subscribe",
-//                   params: {
-//                     symbols: symbol,
-//                   },
-//                 })
-//               );
-//               cache[symbol] = [socket.user.id];
-//             }
-//           }
-//         });
-//       });
-//       ws.on("message", (data) => {
-//         const info = JSON.parse(data.toString());
-//         if (info.event === "price") {
-//           cache[info.symbol].forEach((id: number) => {
-//             let fId = String(id);
-//             // @ts-ignore
-//             app.io.of("/").in(fId).emit("price", JSON.stringify(info));
-//           });
-//         }
-//         console.log(JSON.parse(data.toString()));
-//       });
-//     });
-//   });
-// }

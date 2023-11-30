@@ -46,6 +46,7 @@ class UserService {
     if (!user) throw new UserNotFound();
     return user;
   }
+
   async deleteUser({ id }: { id: number }) {
     const user = await this.userRepository.delete({ id });
   }

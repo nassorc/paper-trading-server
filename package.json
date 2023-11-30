@@ -3,7 +3,7 @@
   "version": "1.0.0",
   "main": "src/index.js",
   "scripts": {
-    "predev": "prisma generate && prisma db push",
+    "predev": "prisma generate && prisma db push && ts-node prisma/seed.ts",
     "dev": "nodemon src/index.ts",
     "build": "tsc",
     "test:integration": "jest -c jest.config.integration.ts --watchAll",

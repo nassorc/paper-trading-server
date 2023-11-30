@@ -18,10 +18,11 @@ import StockController from "../stock";
 import UserController from "../user";
 import WalletController from "../wallet";
 import WatchlistController from "../watchlist";
+import { attachWatchlist } from "./attach_watchlist";
 
 declare module "fastify" {
   interface FastifyInstance {
-    io: Server<{ hello: string }>;
+    io: Server;
   }
 }
 
@@ -51,11 +52,12 @@ export function buildServer(opts?: any): FastifyInstance {
     .register(WalletController)
     .register(WatchlistController)
     .register(async function buildIOServer(app, opts, next) {
-      const authentication = await makeSocketRequireUser(app);
+      const authenticationMW = await makeSocketRequireUser(app);
+      const watchlistMW = await attachWatchlist(app);
       new RealtimeWatchlistServer({
         server: app.io,
         stockService: app.stockService,
-        middleware: [authentication],
+        middleware: [authenticationMW, watchlistMW],
       }).build();
       next();
     })
